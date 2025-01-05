@@ -5,19 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Navigation Mini App</title>
     <style>
-        :root {
-            --bg-color: linear-gradient(135deg, #000000, #1a1a1a);
-            --container-bg: rgba(30, 30, 30, 0.9);
-            --text-color: #ffffff;
-            --button-bg: linear-gradient(90deg, #0f2027, #203a43, #2c5364);
-            --highlight-color: #00ffff;
-        }
-
         body {
             margin: 0;
             font-family: 'Roboto', sans-serif;
-            background: var(--bg-color);
-            color: var(--text-color);
+            background: linear-gradient(135deg, #000000, #1a1a1a);
+            color: #ffffff;
             display: flex;
             justify-content: center;
             align-items: flex-start;
@@ -27,7 +19,7 @@
 
         .container {
             text-align: center;
-            background: var(--container-bg);
+            background: rgba(30, 30, 30, 0.9);
             border-radius: 20px;
             padding: 30px;
             box-shadow: 0 10px 25px rgba(0, 255, 255, 0.2);
@@ -38,24 +30,23 @@
         h1 {
             font-size: 28px;
             margin-bottom: 20px;
-            color: var(--highlight-color);
+            color: #00ffff;
             animation: glow 2s infinite;
         }
 
         .button-group {
             display: flex;
+            flex-direction: column;
             gap: 10px;
             margin-top: 20px;
-            flex-wrap: wrap;
-            justify-content: center;
         }
 
         button {
-            background: var(--button-bg);
-            color: var(--text-color);
+            background: linear-gradient(90deg, #0f2027, #203a43, #2c5364);
+            color: #ffffff;
             border: none;
             border-radius: 12px;
-            padding: 12px 20px;
+            padding: 14px;
             font-size: 16px;
             font-weight: bold;
             cursor: pointer;
@@ -67,126 +58,209 @@
             box-shadow: 0 5px 15px rgba(0, 255, 255, 0.5);
         }
 
-        .toggle-theme {
+        .clear-icon {
             position: absolute;
-            top: 20px;
-            right: 20px;
-            background: transparent;
-            border: none;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 16px;
+            color: #ffffff;
             cursor: pointer;
-            font-size: 18px;
-            color: var(--highlight-color);
+            display: none;
         }
 
-        iframe {
-            margin-top: 20px;
+        .input-wrapper {
+            position: relative;
+            margin-top: 10px;
+        }
+
+        input {
             width: 100%;
-            height: 300px;
-            border: 0;
+            padding: 14px;
+            border-radius: 10px;
+            border: 1px solid #333;
+            background: #1e1e1e;
+            color: #ffffff;
+            font-size: 16px;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #00ffff;
+        }
+
+        input:not(:placeholder-shown) + .clear-icon {
+            display: block;
+        }
+
+        .icon-group {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 20px;
+        }
+
+        .icon {
+            background: linear-gradient(90deg, #ff7f7f, #ff4f4f);
+            color: white;
+            border-radius: 50%;
+            padding: 10px;
+            cursor: pointer;
+            font-size: 20px;
+            transition: transform 0.2s;
+        }
+
+        .icon:hover {
+            transform: scale(1.2);
         }
 
         @keyframes glow {
             0%, 100% {
-                text-shadow: 0 0 5px var(--highlight-color), 0 0 10px var(--highlight-color), 0 0 20px var(--highlight-color);
+                text-shadow: 0 0 5px #00ffff, 0 0 10px #00ffff, 0 0 20px #00ffff;
             }
             50% {
-                text-shadow: 0 0 10px var(--highlight-color), 0 0 20px var(--highlight-color), 0 0 40px var(--highlight-color);
+                text-shadow: 0 0 10px #00ffff, 0 0 20px #00ffff, 0 0 40px #00ffff;
             }
+        }
+
+        .modal {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            z-index: 1000;
+            display: none;
+            color: black;
+            width: 90%;
+            max-width: 400px;
+        }
+
+        .modal-header {
+            font-size: 20px;
+            margin-bottom: 10px;
+        }
+
+        .modal-body {
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+
+        .modal-close {
+            background: red;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 10px;
+            cursor: pointer;
         }
     </style>
 </head>
 <body>
-    <button class="toggle-theme" onclick="toggleTheme()">🌙</button>
     <div class="container">
         <h1>Navigation Mini App</h1>
-        <p>Enter an address, street, or place to search:</p>
-        <div>
-            <input type="text" id="searchInput" placeholder="Enter location...">
-            <button onclick="clearInput()">Clear</button>
+
+        <div class="input-wrapper">
+            <input id="searchInput" type="text" placeholder="Enter location...">
+            <span class="clear-icon" onclick="clearInput()">&times;</span>
         </div>
+
         <div class="button-group">
-            <button onclick="search()">Search</button>
-            <button onclick="saveRoute()">Save Route</button>
-            <button onclick="addWaypoint()">Add Waypoint</button>
+            <button onclick="openSearchDialog()">Search / Route Options</button>
+            <button onclick="shareAddress()">Share Address</button>
+            <button onclick="viewHistory()">View History</button>
         </div>
-        <div class="interactive-text" onclick="showExample()">Need ideas? Click here!</div>
-        <div id="mapContainer"></div>
+
+        <div class="icon-group">
+            <span class="icon" onclick="setFavorite('Home')">🏠</span>
+            <span class="icon" onclick="setFavorite('Work')">💼</span>
+            <span class="icon" onclick="setFavorite('Shop')">🍔</span>
+        </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
-    <script>
-        let waypoints = [];
-        const mapContainer = document.getElementById('mapContainer');
+    <div id="modal" class="modal">
+        <div class="modal-header">How to Use</div>
+        <div class="modal-body">
+            Enter a location (e.g., "Sagrada Familia" or "Carrer de Llull 203").
+            <br>Click "Search / Route" to choose how to search.
+            <br>Save addresses using the Home, Work, or Shop icons.
+        </div>
+        <button class="modal-close" onclick="closeModal()">Close</button>
+    </div>
 
-        // Search function
-        function search() {
+    <script>
+        const history = [];
+
+        function clearInput() {
+            document.getElementById('searchInput').value = '';
+        }
+
+        function openSearchDialog() {
             const query = document.getElementById('searchInput').value.trim();
             if (!query) {
-                alert("Please enter a location to search!");
+                alert('Please enter a location.');
                 return;
             }
 
-            const apiKey = "YOUR_API_KEY"; // Replace with your Google Maps API key
-            const mapUrl = `https://www.google.com/maps/embed/v1/place?key=${apiKey}&q=${encodeURIComponent(query)}`;
+            const searchType = prompt(
+                'Choose an option: \n1. Route \n2. Search place \n3. Find nearby',
+                '1'
+            );
 
-            mapContainer.innerHTML = `<iframe src="${mapUrl}" allowfullscreen></iframe>`;
+            let googleUrl;
+            switch (searchType) {
+                case '1':
+                    googleUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(query)}`;
+                    break;
+                case '2':
+                    googleUrl = `https://www.google.com/maps/search/${encodeURIComponent(query)}`;
+                    break;
+                case '3':
+                    googleUrl = `https://www.google.com/maps/search/${encodeURIComponent(query)}+near+me`;
+                    break;
+                default:
+                    alert('Invalid choice.');
+                    return;
+            }
+
+            history.push(query);
+            window.open(googleUrl, '_blank');
         }
 
-        // Clear input field
-        function clearInput() {
-            const searchInput = document.getElementById('searchInput');
-            searchInput.value = '';
-            searchInput.focus();
-        }
+        function shareAddress() {
+            const query = document.getElementById('searchInput').value.trim();
+            if (!query) {
+                alert('Please enter a location to share.');
+                return;
+            }
 
-        // Save current route as image
-        function saveRoute() {
-            html2canvas(document.body).then(canvas => {
-                const link = document.createElement('a');
-                link.download = 'route.png';
-                link.href = canvas.toDataURL('image/png');
-                link.click();
+            navigator.clipboard.writeText(query).then(() => {
+                alert('Address copied to clipboard!');
             });
         }
 
-        // Add waypoint
-        function addWaypoint() {
-            const waypoint = prompt("Enter an additional location:");
-            if (waypoint) {
-                waypoints.push(waypoint);
-                alert(`Waypoint added: ${waypoint}`);
+        function viewHistory() {
+            if (history.length === 0) {
+                alert('No history found.');
+                return;
             }
+
+            const historyList = history.join('\n');
+            alert(`Search History:\n${historyList}`);
         }
 
-        // Show example input
-        function showExample() {
-            const examples = [
-                "Restaurants",
-                "Carrer de Llull",
-                "Coffee shops",
-                "Plaza Catalunya",
-                "Sagrada Familia",
-                "Metro Sagrera"
-            ];
-            const randomExample = examples[Math.floor(Math.random() * examples.length)];
-            document.getElementById('searchInput').value = randomExample;
+        function setFavorite(place) {
+            alert(`${place} location saved!`);
         }
 
-        // Toggle theme
-        function toggleTheme() {
-            const root = document.documentElement;
-            const isDark = getComputedStyle(root).getPropertyValue('--bg-color').includes('000000');
-            if (isDark) {
-                root.style.setProperty('--bg-color', 'linear-gradient(135deg, #ffffff, #f1f1f1)');
-                root.style.setProperty('--text-color', '#000000');
-                root.style.setProperty('--highlight-color', '#007acc');
-                root.style.setProperty('--button-bg', 'linear-gradient(90deg, #e0e0e0, #cfcfcf, #bfbfbf)');
-            } else {
-                root.style.setProperty('--bg-color', 'linear-gradient(135deg, #000000, #1a1a1a)');
-                root.style.setProperty('--text-color', '#ffffff');
-                root.style.setProperty('--highlight-color', '#00ffff');
-                root.style.setProperty('--button-bg', 'linear-gradient(90deg, #0f2027, #203a43, #2c5364)');
-            }
+        function closeModal() {
+            document.getElementById('modal').style.display = 'none';
+        }
+
+        function showModal() {
+            document.getElementById('modal').style.display = 'block';
         }
     </script>
 </body>
