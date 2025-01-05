@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!DOCTYPE html> 
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -7,13 +7,10 @@
     <style>
         :root {
             --bg-color: linear-gradient(135deg, #000000, #1a1a1a);
+            --container-bg: rgba(30, 30, 30, 0.9);
             --text-color: #ffffff;
             --button-bg: linear-gradient(90deg, #0f2027, #203a43, #2c5364);
-            --button-hover-shadow: rgba(0, 255, 255, 0.5);
             --highlight-color: #00ffff;
-            --secondary-text: #dcdcdc;
-            --placeholder-color: #6e6e6e;
-            --box-shadow: rgba(0, 255, 255, 0.2);
         }
 
         body {
@@ -30,10 +27,10 @@
 
         .container {
             text-align: center;
-            background: rgba(30, 30, 30, 0.9);
+            background: var(--container-bg);
             border-radius: 20px;
             padding: 30px;
-            box-shadow: 0 10px 25px var(--box-shadow);
+            box-shadow: 0 10px 25px rgba(0, 255, 255, 0.2);
             max-width: 400px;
             width: 100%;
         }
@@ -45,44 +42,12 @@
             animation: glow 2s infinite;
         }
 
-        p {
-            font-size: 16px;
-            margin-bottom: 24px;
-            color: var(--secondary-text);
-        }
-
-        .input-wrapper {
-            position: relative;
-        }
-
-        input[type="text"] {
-            width: calc(100% - 20px);
-            padding: 12px;
-            border-radius: 10px;
-            border: 1px solid #333333;
-            outline: none;
-            font-size: 16px;
-            background: #1e1e1e;
-            color: var(--text-color);
-        }
-
-        input[type="text"]::placeholder {
-            color: var(--placeholder-color);
-        }
-
-        .clear-icon {
-            position: absolute;
-            right: 10px;
-            top: 50%;
-            transform: translateY(-50%);
-            font-size: 16px;
-            color: var(--text-color);
-            cursor: pointer;
-            display: none;
-        }
-
-        input[type="text"]:not(:placeholder-shown) + .clear-icon {
-            display: block;
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
         }
 
         button {
@@ -95,24 +60,22 @@
             font-weight: bold;
             cursor: pointer;
             transition: transform 0.2s ease, box-shadow 0.2s ease;
-            margin-top: 20px;
         }
 
         button:hover {
             transform: scale(1.05);
-            box-shadow: 0 5px 15px var(--button-hover-shadow);
+            box-shadow: 0 5px 15px rgba(0, 255, 255, 0.5);
         }
 
-        .interactive-text {
-            font-size: 14px;
-            margin-top: 10px;
-            color: var(--highlight-color);
-            animation: pulse 2s infinite;
+        .toggle-theme {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: transparent;
+            border: none;
             cursor: pointer;
-        }
-
-        .interactive-text:hover {
-            text-decoration: underline;
+            font-size: 18px;
+            color: var(--highlight-color);
         }
 
         @keyframes glow {
@@ -123,48 +86,10 @@
                 text-shadow: 0 0 10px var(--highlight-color), 0 0 20px var(--highlight-color), 0 0 40px var(--highlight-color);
             }
         }
-
-        @keyframes pulse {
-            0%, 100% {
-                opacity: 0.8;
-            }
-            50% {
-                opacity: 1;
-            }
-        }
-
-        .map-container {
-            margin-top: 20px;
-            width: 100%;
-            height: 300px;
-            border-radius: 10px;
-            overflow: hidden;
-        }
-
-        iframe {
-            width: 100%;
-            height: 100%;
-            border: none;
-        }
-
-        .history {
-            margin-top: 20px;
-            text-align: left;
-            font-size: 14px;
-            color: var(--secondary-text);
-        }
-
-        .history-item {
-            cursor: pointer;
-            margin: 5px 0;
-        }
-
-        .history-item:hover {
-            text-decoration: underline;
-        }
     </style>
 </head>
 <body>
+    <button class="toggle-theme" onclick="toggleTheme()">🌙</button>
     <div class="container">
         <h1>Navigation Mini App</h1>
         <p>Enter an address, street, or place to search:</p>
@@ -172,19 +97,18 @@
             <input type="text" id="searchInput" placeholder="Enter location...">
             <span class="clear-icon" onclick="clearInput()">✖</span>
         </div>
-        <button onclick="search()">Search</button>
+        <div class="button-group">
+            <button onclick="search()">Search</button>
+            <button onclick="saveRoute()">Save Route</button>
+            <button onclick="addWaypoint()">Add Waypoint</button>
+        </div>
         <div class="interactive-text" onclick="showExample()">Need ideas? Click here!</div>
-        <div class="map-container">
-            <iframe id="mapFrame" src=""></iframe>
-        </div>
-        <div class="history" id="historyContainer">
-            <h3>History</h3>
-        </div>
+        <div id="mapContainer" style="margin-top: 20px;"></div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
     <script>
-        const searchHistory = [];
-        const historyContainer = document.getElementById('historyContainer');
+        const localStorageKey = "customTheme";
 
         function search() {
             const query = document.getElementById('searchInput').value.trim();
@@ -193,52 +117,49 @@
                 return;
             }
 
-            // Add to history
-            if (!searchHistory.includes(query)) {
-                searchHistory.push(query);
-                if (searchHistory.length > 5) searchHistory.shift();
-                updateHistory();
-            }
-
-            const googleMapsUrl = `https://www.google.com/maps/search/${encodeURIComponent(query)}`;
-            document.getElementById('mapFrame').src = googleMapsUrl;
+            // Embed Google Maps iframe
+            const mapContainer = document.getElementById('mapContainer');
+            mapContainer.innerHTML = `<iframe
+                width="100%"
+                height="300"
+                frameborder="0"
+                style="border:0"
+                src="https://www.google.com/maps/embed/v1/place?key=YOUR_API_KEY&q=${encodeURIComponent(query)}"
+                allowfullscreen>
+            </iframe>`;
         }
 
-        function clearInput() {
-            const searchInput = document.getElementById('searchInput');
-            searchInput.value = '';
-            searchInput.focus();
-        }
-
-        function showExample() {
-            const examples = [
-                "Restaurants",
-                "Carrer de Llull",
-                "Coffee shops",
-                "Plaza Catalunya",
-                "ATMs",
-                "Pharmacies",
-                "Sagrada Familia",
-                "Metro Sagrera",
-                "Shopping malls",
-                "Carrer de Balmes"
-            ];
-            const randomExample = examples[Math.floor(Math.random() * examples.length)];
-            document.getElementById('searchInput').value = randomExample;
-        }
-
-        function updateHistory() {
-            historyContainer.innerHTML = '<h3>History</h3>';
-            searchHistory.forEach(item => {
-                const historyItem = document.createElement('div');
-                historyItem.classList.add('history-item');
-                historyItem.textContent = item;
-                historyItem.onclick = () => {
-                    document.getElementById('searchInput').value = item;
-                    search();
-                };
-                historyContainer.appendChild(historyItem);
+        function saveRoute() {
+            html2canvas(document.body).then(canvas => {
+                const link = document.createElement("a");
+                link.href = canvas.toDataURL("image/png");
+                link.download = "route.png";
+                link.click();
             });
+        }
+
+        function addWaypoint() {
+            const waypoint = prompt("Enter an additional location:");
+            if (waypoint) {
+                const input = document.getElementById('searchInput');
+                input.value += ` -> ${waypoint}`;
+            }
+        }
+
+        function toggleTheme() {
+            const root = document.documentElement;
+            const isDark = root.style.getPropertyValue('--bg-color') === 'linear-gradient(135deg, #ffffff, #f1f1f1)';
+            if (isDark) {
+                root.style.setProperty('--bg-color', 'linear-gradient(135deg, #000000, #1a1a1a)');
+                root.style.setProperty('--text-color', '#ffffff');
+                root.style.setProperty('--highlight-color', '#00ffff');
+                root.style.setProperty('--button-bg', 'linear-gradient(90deg, #0f2027, #203a43, #2c5364)');
+            } else {
+                root.style.setProperty('--bg-color', 'linear-gradient(135deg, #ffffff, #f1f1f1)');
+                root.style.setProperty('--text-color', '#000000');
+                root.style.setProperty('--highlight-color', '#007acc');
+                root.style.setProperty('--button-bg', 'linear-gradient(90deg, #e0e0e0, #cfcfcf, #bfbfbf)');
+            }
         }
     </script>
 </body>
