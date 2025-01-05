@@ -1,133 +1,98 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Навигационный Бот</title>
-  <style>
-    /* Устанавливаем шрифты и базовые стили */
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
-    body {
-      margin: 0;
-      font-family: 'Inter', sans-serif;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      background: linear-gradient(135deg, #4f46e5, #3b82f6);
-      overflow: hidden;
-      color: #fff;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Navigation Mini App</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(to bottom, #1e293b, #0f172a);
+            color: #ffffff;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            padding-top: 80px; /* Подняли интерфейс вверх */
+        }
 
-    h1 {
-      font-size: 3rem;
-      margin-bottom: 1rem;
-      text-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3);
-    }
+        .container {
+            text-align: center;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.4);
+            max-width: 400px;
+            width: 100%;
+        }
 
-    p {
-      font-size: 1.2rem;
-      margin-bottom: 2rem;
-      opacity: 0.8;
-    }
+        h1 {
+            font-size: 24px;
+            margin-bottom: 16px;
+            color: #ffcc00;
+            animation: glow 2s infinite;
+        }
 
-    /* Карточка приложения */
-    .app-container {
-      background: rgba(255, 255, 255, 0.1);
-      padding: 2rem;
-      border-radius: 20px;
-      box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.3);
-      text-align: center;
-      width: 90%;
-      max-width: 500px;
-    }
+        p {
+            font-size: 16px;
+            margin-bottom: 24px;
+        }
 
-    /* Кнопки */
-    .btn {
-      display: inline-block;
-      padding: 1rem 2rem;
-      margin: 0.5rem 0;
-      font-size: 1.2rem;
-      font-weight: 600;
-      border: none;
-      border-radius: 10px;
-      background: linear-gradient(135deg, #3b82f6, #9333ea);
-      color: #fff;
-      cursor: pointer;
-      transition: transform 0.3s, box-shadow 0.3s;
-      box-shadow: 0px 5px 15px rgba(147, 51, 234, 0.4);
-    }
+        input[type="text"] {
+            width: calc(100% - 20px);
+            padding: 10px;
+            margin-bottom: 16px;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+            outline: none;
+            font-size: 16px;
+        }
 
-    .btn:hover {
-      transform: translateY(-3px);
-      box-shadow: 0px 10px 25px rgba(147, 51, 234, 0.6);
-    }
+        button {
+            background: #ffcc00;
+            color: #0f172a;
+            border: none;
+            border-radius: 8px;
+            padding: 10px 16px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
 
-    .btn:active {
-      transform: translateY(1px);
-      box-shadow: 0px 3px 10px rgba(147, 51, 234, 0.4);
-    }
+        button:hover {
+            background: #ffd633;
+        }
 
-    /* Анимация загрузки */
-    .loading {
-      display: none;
-      margin-top: 1rem;
-      font-size: 1rem;
-      opacity: 0.8;
-    }
-
-    .loading.active {
-      display: block;
-    }
-  </style>
+        @keyframes glow {
+            0%, 100% {
+                text-shadow: 0 0 8px #ffcc00, 0 0 16px #ffcc00, 0 0 24px #ffcc00;
+            }
+            50% {
+                text-shadow: 0 0 16px #ffd633, 0 0 32px #ffd633, 0 0 48px #ffd633;
+            }
+        }
+    </style>
 </head>
 <body>
-body {
-    padding-top: 100px; /* Увеличь значение для большего отступа */
-}
-  <div class="app-container">
-    <h1>🌍 Навигация</h1>
-    <p>Введите адрес или место, чтобы найти его на карте:</p>
-    <input
-      id="search-input"
-      type="text"
-      placeholder="Введите адрес или место"
-      style="padding: 1rem; width: 100%; border-radius: 10px; border: none; margin-bottom: 1rem; font-size: 1rem;"
-    />
-    <button class="btn" id="search-btn">🔍 Найти</button>
-    <div class="loading" id="loading-text">Поиск...</div>
-    <div id="result" style="margin-top: 1rem;"></div>
-  </div>
+    <div class="container">
+        <h1>Welcome to Navigation Mini App</h1>
+        <p>Enter an address or place to search:</p>
+        <input type="text" id="searchInput" placeholder="Enter location...">
+        <button onclick="search()">Search</button>
+    </div>
 
-  <script>
-    const searchBtn = document.getElementById('search-btn');
-    const searchInput = document.getElementById('search-input');
-    const loadingText = document.getElementById('loading-text');
-    const resultContainer = document.getElementById('result');
-
-    // Симуляция поиска
-    searchBtn.addEventListener('click', () => {
-      const query = searchInput.value.trim();
-      if (!query) {
-        alert('Пожалуйста, введите запрос.');
-        return;
-      }
-
-      // Показываем загрузку
-      loadingText.classList.add('active');
-      resultContainer.innerHTML = '';
-
-      // Фейковая задержка для демонстрации
-      setTimeout(() => {
-        loadingText.classList.remove('active');
-        const googleMapsUrl = `https://www.google.com/maps/search/${encodeURIComponent(query)}`;
-        resultContainer.innerHTML = `
-          <p>Результаты поиска для: <strong>${query}</strong></p>
-          <a href="${googleMapsUrl}" target="_blank" class="btn">🌐 Открыть в Google Картах</a>
-        `;
-      }, 2000);
-    });
-  </script>
+    <script>
+        function search() {
+            const query = document.getElementById('searchInput').value.trim();
+            if (query) {
+                const googleMapsUrl = `https://www.google.com/maps/search/${encodeURIComponent(query)}`;
+                window.open(googleMapsUrl, '_blank');
+            } else {
+                alert("Please enter a location to search!");
+            }
+        }
+    </script>
 </body>
 </html>
