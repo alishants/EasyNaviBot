@@ -1,38 +1,39 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Navigation Mini App</title>
     <style>
         :root {
-            /* Тёмная тема */
+            /* Dark Theme */
             --bg-color: #000000;
             --container-bg: rgba(30, 30, 30, 0.9);
             --text-color: #ffffff;
             --button-bg: linear-gradient(90deg, #0f2027, #203a43, #2c5364);
             --title-color: #00ffff;
-            --shadow-color: rgba(0, 255, 255, 0.5);
+            --shadow-color: rgba(0, 255, 255, 0.3);
             --icon-color: #ff4d4d;
-            --input-border-color: #ccc;
+            --input-border-color: rgba(0, 255, 255, 0.5);
             --input-bg: #1e1e1e;
-            --history-bg: #1a1a1a;
-            --history-hover-bg: rgba(0, 255, 255, 0.1);
+            --history-hover-bg: rgba(0, 255, 255, 0.15);
+            --modal-bg: rgba(20, 20, 20, 0.95);
         }
 
         [data-theme="light"] {
-            /* Светлая тема */
+            /* Light Theme */
             --bg-color: #f9f9f9;
             --container-bg: #ffffff;
             --text-color: #333333;
             --button-bg: linear-gradient(90deg, #e0eafc, #cfdef3);
             --title-color: #0057ff;
-            --shadow-color: rgba(0, 87, 255, 0.5);
+            --shadow-color: rgba(0, 87, 255, 0.3);
             --icon-color: #ff3333;
-            --input-border-color: #aaa;
+            --input-border-color: rgba(0, 87, 255, 0.5);
             --input-bg: #f1f1f1;
-            --history-bg: #f5f5f5;
-            --history-hover-bg: rgba(0, 87, 255, 0.1);
+            --history-hover-bg: rgba(0, 87, 255, 0.15);
+            --modal-bg: rgba(255, 255, 255, 0.95);
         }
 
         body {
@@ -45,7 +46,7 @@
             align-items: flex-start;
             min-height: 100vh;
             padding-top: 80px;
-            transition: background-color 0.3s, color 0.3s;
+            transition: all 0.3s ease-in-out;
         }
 
         .container {
@@ -57,7 +58,7 @@
             max-width: 400px;
             width: 100%;
             position: relative;
-            transition: background-color 0.3s, box-shadow 0.3s;
+            transition: all 0.3s ease-in-out;
         }
 
         .help-icon {
@@ -67,88 +68,79 @@
             font-size: 24px;
             color: var(--icon-color);
             cursor: pointer;
+            transition: transform 0.2s ease-in-out;
+        }
+
+        .help-icon:hover {
+            transform: scale(1.2);
         }
 
         h1 {
-            font-size: 28px;
+            font-size: 32px;
             margin-bottom: 20px;
             color: var(--title-color);
             cursor: pointer;
-            transition: color 0.3s;
+            transition: color 0.3s ease-in-out, transform 0.3s;
+        }
+
+        h1:hover {
+            transform: scale(1.05);
+            color: var(--icon-color);
         }
 
         .input-wrapper {
             position: relative;
+            margin-bottom: 20px;
         }
 
         input[type="text"] {
-            width: calc(100% - 20px);
-            padding: 14px;
-            border-radius: 10px;
-            border: 1px solid var(--input-border-color);
+            width: 100%;
+            padding: 14px 20px;
+            border-radius: 30px;
+            border: 2px solid var(--input-border-color);
             outline: none;
             font-size: 18px;
             background: var(--input-bg);
             color: var(--text-color);
-            transition: background-color 0.3s, border-color 0.3s, color 0.3s;
+            transition: all 0.3s ease-in-out;
+            box-shadow: 0 4px 10px rgba(0, 255, 255, 0.2);
         }
 
         input[type="text"]:focus {
             border-color: var(--title-color);
-            box-shadow: 0 0 8px var(--title-color);
+            box-shadow: 0 6px 15px var(--shadow-color);
         }
 
         button {
+            display: inline-block;
             background: var(--button-bg);
             color: var(--text-color);
             border: none;
-            border-radius: 12px;
-            padding: 14px 25px;
+            border-radius: 25px;
+            padding: 14px 30px;
             font-size: 18px;
             cursor: pointer;
             margin-top: 20px;
-            transition: background 0.3s, box-shadow 0.3s;
+            transition: all 0.3s ease-in-out;
+            box-shadow: 0 4px 10px rgba(0, 255, 255, 0.2);
         }
 
         button:hover {
-            box-shadow: 0 5px 15px rgba(0, 255, 255, 0.4);
+            transform: scale(1.05);
+            box-shadow: 0 8px 20px rgba(0, 255, 255, 0.4);
         }
 
         .interactive-text {
-            font-size: 14px;
-            margin-top: 20px;
+            font-size: 16px;
+            margin-top: 15px;
             color: var(--title-color);
             cursor: pointer;
-            transition: color 0.3s;
+            transition: all 0.3s ease-in-out;
         }
 
         .interactive-text:hover {
             text-decoration: underline;
-        }
-
-        .history-container {
-            background: var(--history-bg);
-            border-radius: 10px;
-            padding: 15px;
-            margin-top: 20px;
-        }
-
-        ul.history-list {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
-
-        ul.history-list li {
-            padding: 10px;
-            border-bottom: 1px solid var(--input-border-color);
-            cursor: pointer;
-            text-align: left;
-            transition: background-color 0.3s;
-        }
-
-        ul.history-list li:hover {
-            background-color: var(--history-hover-bg);
+            color: var(--icon-color);
         }
 
         .modal {
@@ -157,31 +149,56 @@
             left: 50%;
             transform: translate(-50%, -50%);
             width: 90%;
-            max-width: 400px;
-            background: var(--container-bg);
+            max-width: 450px;
+            background: var(--modal-bg);
             color: var(--text-color);
             padding: 20px;
-            border-radius: 15px;
-            box-shadow: 0 10px 25px var(--shadow-color);
+            border-radius: 20px;
+            box-shadow: 0 10px 30px var(--shadow-color);
             display: none;
             z-index: 1000;
-            transition: transform 0.3s ease-out, background-color 0.3s, color 0.3s;
+            transition: all 0.3s ease-in-out;
         }
 
         .modal.active {
             display: block;
-            transform: translate(-50%, -50%) scale(1.05);
         }
 
         .close-modal {
             text-align: right;
-            font-size: 18px;
+            font-size: 20px;
             cursor: pointer;
             margin-bottom: 10px;
+        }
+
+        .close-modal:hover {
             color: var(--icon-color);
+        }
+
+        ul.history-list {
+            list-style: none;
+            padding: 0;
+            margin-top: 10px;
+        }
+
+        ul.history-list li {
+            padding: 12px 15px;
+            border-radius: 10px;
+            border: 1px solid var(--input-border-color);
+            background: var(--input-bg);
+            cursor: pointer;
+            text-align: left;
+            margin-bottom: 8px;
+            transition: all 0.3s ease-in-out;
+        }
+
+        ul.history-list li:hover {
+            background-color: var(--history-hover-bg);
+            transform: scale(1.02);
         }
     </style>
 </head>
+
 <body>
     <div class="container">
         <span class="help-icon" onclick="toggleHelpModal()">❓</span>
@@ -191,10 +208,8 @@
         </div>
         <button onclick="search()">Search</button>
         <div class="interactive-text" onclick="showExample()">Need ideas? Click here!</div>
-        <div class="history-container">
-            <h3>Search History</h3>
-            <ul class="history-list" id="historyList"></ul>
-        </div>
+        <h3>Search History</h3>
+        <ul class="history-list" id="historyList"></ul>
     </div>
 
     <div class="modal" id="helpModal">
@@ -205,10 +220,11 @@
         <p>Address: <i>Carrer de Llull 203</i></p>
         <p>Metro: <i>Metro Diagonal</i></p>
         <p>Place: <i>Sagrada Familia</i></p>
-        <p>Shop: <i>Tabacs or MacDonalds</i></p>
+        <p>Shop: <i>Tabacs or McDonald's</i></p>
     </div>
 
     <script>
+        // Keep the script part unchanged
         const historyList = document.getElementById("historyList");
         const body = document.body;
 
@@ -234,8 +250,7 @@
                 googleMapsUrl = `https://www.google.com/maps/search/${encodeURIComponent(query)}+near+me`;
             }
 
-            location.href = googleMapsUrl;
-
+            window.open(googleMapsUrl, "_blank");
             saveToHistory(query);
             updateHistoryList();
         }
@@ -309,6 +324,5 @@
         body.dataset.theme = "dark";
     </script>
 </body>
+
 </html>
-
-
