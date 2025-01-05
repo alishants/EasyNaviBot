@@ -1,158 +1,92 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Navigation Mini App</title>
-    <style>
-        body {
-            margin: 0;
-            font-family: 'Roboto', sans-serif;
-            background: linear-gradient(135deg, #000000, #1a1a1a); /* Чёрный футуристический фон */
-            color: #ffffff;
-            display: flex;
-            justify-content: center;
-            align-items: flex-start;
-            min-height: 100vh;
-            padding-top: 80px; /* Увеличенный top padding */
-        }
+from telegram import Update
+from telegram.ext import Application, MessageHandler, filters, ContextTypes
+import googlemaps
 
-        .container {
-            text-align: center;
-            background: rgba(30, 30, 30, 0.9);
-            border-radius: 20px;
-            padding: 30px;
-            box-shadow: 0 10px 25px rgba(0, 255, 255, 0.2); /* Лёгкое сияние */
-            max-width: 400px;
-            width: 100%;
-        }
+# Вставь свои ключи
+TELEGRAM_TOKEN = "YOUR_TELEGRAM_BOT_TOKEN"
+GOOGLE_MAPS_API_KEY = "YOUR_GOOGLE_MAPS_API_KEY"
 
-        h1 {
-            font-size: 28px;
-            margin-bottom: 20px;
-            color: #00ffff; /* Насыщенный цвет для заголовка */
-            animation: glow 2s infinite;
-        }
+# Инициализация Google Maps API
+gmaps = googlemaps.Client(key=GOOGLE_MAPS_API_KEY)
 
-        p {
-            font-size: 16px;
-            margin-bottom: 24px;
-            color: #dcdcdc;
-        }
+# Приветственное сообщение
+async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    welcome_message = (
+        "Привет! Я навигационный бот. Напиши мне адрес, название места или услугу, и я помогу тебе! \U0001F30D"
+    )
+    await update.message.reply_text(welcome_message)
 
-        input[type="text"] {
-            width: calc(100% - 20px);
-            padding: 12px;
-            margin-bottom: 20px;
-            border-radius: 10px;
-            border: 1px solid #333333;
-            outline: none;
-            font-size: 16px;
-            background: #1e1e1e;
-            color: #ffffff;
-        }
+# Логика поиска
+async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    user_message = update.message.text.strip()
 
-        input[type="text"]::placeholder {
-            color: #6e6e6e;
-        }
+    try:
+        geocode_result = gmaps.geocode(user_message)
+        
+        if geocode_result:
+            location = geocode_result[0]["geometry"]["location"]
+            formatted_address = geocode_result[0]["formatted_address"]
+            google_maps_url = f"https://www.google.com/maps/dir/?api=1&destination={location['lat']},{location['lng']}"
+            response = f"\U0001F4CD Адрес: {formatted_address}\n\U0001F6E3 Маршрут: {google_maps_url}"
 
-        button {
-            background: linear-gradient(90deg, #0f2027, #203a43, #2c5364);
-            color: #ffffff;
-            border: none;
-            border-radius: 12px;
-            padding: 12px 20px;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
-        }
+        elif any(keyword in user_message.lower() for keyword in ["метро", "станция"]):
+            places_result = gmaps.places(query=user_message, type="subway_station")
+            if places_result.get("results"):
+                station = places_result["results"][0]
+                name = station.get("name", "Неизвестная станция")
+                location = station["geometry"]["location"]
+                google_maps_url = f"https://www.google.com/maps?q={location['lat']},{location['lng']}"
+                response = f"\U0001F689 Станция метро: {name}\n\U0001F6A9 Карта: {google_maps_url}"
+            else:
+                response = "Не удалось найти станцию метро по вашему запросу."
 
-        button:hover {
-            transform: scale(1.05);
-            box-shadow: 0 5px 15px rgba(0, 255, 255, 0.5); /* Сияние при наведении */
-        }
+        elif gmaps.places(query=user_message, type="route").get("results"):
+            # Если запрос - улица
+            route_result = gmaps.places(query=user_message, type="route")["results"][0]
+            name = route_result.get("name", "Неизвестная улица")
+            google_maps_url = f"https://www.google.com/maps?q={name}"
+            response = f"\U0001F6A7 Улица: {name}\n\U0001F5FA Карта: {google_maps_url}"
 
-        .interactive-text {
-            font-size: 14px;
-            margin-top: 10px;
-            color: #00ffff;
-            animation: pulse 2s infinite;
-            cursor: pointer;
-        }
+        elif user_message.lower() in ["кафе", "рестораны", "магазины", "сигареты"]:
+            # Если ищут категории мест
+            places_result = gmaps.places_nearby(
+                location=(41.3851, 2.1734), radius=5000, keyword=user_message
+            )
+            if places_result.get("results"):
+                suggestions = "\n".join(
+                    [
+                        f"\U0001F4CC {place.get('name', 'Неизвестное место')} - {place.get('vicinity', 'Адрес не найден')}"
+                        for place in places_result["results"][:5]
+                    ]
+                )
+                response = f"Вот что я нашел поблизости:\n{suggestions}"
+            else:
+                response = "Не удалось найти подходящие места поблизости."
 
-        .interactive-text:hover {
-            text-decoration: underline;
-        }
+        else:
+            # Поиск любых других мест
+            places_result = gmaps.places(query=user_message)
+            if places_result.get("results"):
+                place = places_result["results"][0]
+                name = place.get("name", "Неизвестное место")
+                address = place.get("formatted_address", "Адрес не найден")
+                location = place["geometry"]["location"]
+                google_maps_url = f"https://www.google.com/maps?q={location['lat']},{location['lng']}"
+                response = f"\U0001F4CC Место: {name}\n\U0001F4CD Адрес: {address}\n\U0001F5FA Карта: {google_maps_url}"
+            else:
+                response = "Не удалось найти места по вашему запросу."
 
-        @keyframes glow {
-            0%, 100% {
-                text-shadow: 0 0 5px #00ffff, 0 0 10px #00ffff, 0 0 20px #00ffff;
-            }
-            50% {
-                text-shadow: 0 0 10px #00ffff, 0 0 20px #00ffff, 0 0 40px #00ffff;
-            }
-        }
+        await update.message.reply_text(response)
 
-        @keyframes pulse {
-            0%, 100% {
-                opacity: 0.8;
-            }
-            50% {
-                opacity: 1;
-            }
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <h1>Navigation Mini App</h1>
-        <p>Enter an address, street, or place to search:</p>
-        <input type="text" id="searchInput" placeholder="Enter location...">
-        <button onclick="search()">Search</button>
-        <div class="interactive-text" onclick="showExample()">Need ideas? Click here!</div>
-    </div>
+    except Exception as e:
+        await update.message.reply_text(f"Произошла ошибка: {e}")
 
-    <script>
-        function search() {
-            const query = document.getElementById('searchInput').value.trim();
-            if (!query) {
-                alert("Please enter a location to search!");
-                return;
-            }
+# Основная функция запуска
+def main():
+    application = Application.builder().token(TELEGRAM_TOKEN).build()
+    application.add_handler(MessageHandler(filters.COMMAND, start))
+    application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
+    application.run_polling()
 
-            // Определяем тип запроса
-            const isAddress = /\d+/.test(query); // Если содержит цифры — вероятно адрес
-            const isStreet = /\b(street|avenue|road|boulevard|drive|lane|carrer|calle)\b/i.test(query); // Если содержит улицу
-
-            let googleMapsUrl;
-
-            if (isAddress) {
-                // Логика для конкретного адреса
-                googleMapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`;
-            } else if (isStreet) {
-                // Логика для поиска только улицы
-                googleMapsUrl = `https://www.google.com/maps/search/${encodeURIComponent(query)}`;
-            } else {
-                // Логика для поиска мест (добавляет "near me")
-                googleMapsUrl = `https://www.google.com/maps/search/${encodeURIComponent(query)}+near+me`;
-            }
-
-            window.open(googleMapsUrl, '_blank');
-        }
-
-        function showExample() {
-            const examples = [
-                "Restaurants",
-                "Carrer de Llull",
-                "Coffee shops",
-                "Carrer de Balmes",
-                "ATMs",
-                "Pharmacies"
-            ];
-            const randomExample = examples[Math.floor(Math.random() * examples.length)];
-            document.getElementById('searchInput').value = randomExample;
-        }
-    </script>
-</body>
-</html>
+if __name__ == "__main__":
+    main()
