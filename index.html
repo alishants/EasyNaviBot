@@ -114,6 +114,20 @@
             text-decoration: underline;
         }
 
+        .map-container {
+            margin-top: 20px;
+            display: none;
+        }
+
+        .map-container iframe {
+            width: 100%;
+            height: 300px;
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 10px 25px var(--shadow-color);
+            transition: box-shadow 0.3s;
+        }
+
         ul.history-list {
             list-style: none;
             padding: 0;
@@ -131,17 +145,7 @@
         ul.history-list li:hover {
             background-color: var(--history-hover-bg);
         }
-
-        /* Карта */
-        #map {
-            width: 100%;
-            height: 400px;
-            margin-top: 20px;
-            border-radius: 10px;
-            display: none; /* По умолчанию скрыта */
-        }
     </style>
-    <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY"></script>
 </head>
 <body>
     <div class="container">
@@ -151,13 +155,18 @@
             <input type="text" id="searchInput" placeholder="Enter location...">
         </div>
         <button onclick="search()">Search</button>
-        <div id="map"></div>
+        <div class="interactive-text" onclick="showExample()">Need ideas? Click here!</div>
         <h3>Search History</h3>
         <ul class="history-list" id="historyList"></ul>
+        <div class="map-container" id="mapContainer">
+            <iframe id="mapFrame"></iframe>
+        </div>
     </div>
 
     <script>
-        let map;
+        const historyList = document.getElementById("historyList");
+        const mapContainer = document.getElementById("mapContainer");
+        const mapFrame = document.getElementById("mapFrame");
 
         function search() {
             const query = document.getElementById("searchInput").value.trim();
@@ -166,38 +175,45 @@
                 return;
             }
 
-            // Используем Geocoding API
-            const geocoder = new google.maps.Geocoder();
-            geocoder.geocode({ address: query }, (results, status) => {
-                if (status === "OK") {
-                    const location = results[0].geometry.location;
-
-                    // Создаём карту или обновляем центр
-                    if (!map) {
-                        map = new google.maps.Map(document.getElementById("map"), {
-                            zoom: 14,
-                            center: location,
-                        });
-                    } else {
-                        map.setCenter(location);
-                    }
-
-                    // Добавляем маркер
-                    new google.maps.Marker({
-                        position: location,
-                        map: map,
-                        title: query,
-                    });
-
-                    // Показываем карту
-                    document.getElementById("map").style.display = "block";
-                } else {
-                    alert("Could not find the location: " + status);
-                }
-            });
+            const googleMapsUrl = `https://www.google.com/maps/embed/v1/search?key=YOUR_GOOGLE_API_KEY&q=${encodeURIComponent(query)}`;
+            mapFrame.src = googleMapsUrl;
+            mapContainer.style.display = "block";
+            saveToHistory(query);
+            updateHistoryList();
         }
 
-        // Остальные функции (история, смена темы и т.д.) остаются без изменений
+        function saveToHistory(query) {
+            const history = JSON.parse(localStorage.getItem("searchHistory") || "[]");
+            if (!history.includes(query)) {
+                history.unshift(query);
+                if (history.length > 10) history.pop();
+                localStorage.setItem("searchHistory", JSON.stringify(history));
+            }
+        }
+
+        function updateHistoryList() {
+            const history = JSON.parse(localStorage.getItem("searchHistory") || "[]");
+            historyList.innerHTML = history.map(item => `<li onclick="setSearch('${item}')">${item}</li>`).join("");
+        }
+
+        function setSearch(value) {
+            document.getElementById("searchInput").value = value;
+        }
+
+        function showExample() {
+            const examples = ["Restaurants", "Carrer de Llull", "Sagrada Familia", "Metro Diagonal"];
+            const randomExample = examples[Math.floor(Math.random() * examples.length)];
+            document.getElementById("searchInput").value = randomExample;
+        }
+
+        function toggleTheme() {
+            document.body.dataset.theme = document.body.dataset.theme === "light" ? "dark" : "light";
+        }
+
+        // Initialize history on page load
+        updateHistoryList();
+        // Set default theme
+        document.body.dataset.theme = "dark";
     </script>
 </body>
 </html>
