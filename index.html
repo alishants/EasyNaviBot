@@ -34,28 +34,29 @@
             animation: glow 2s infinite;
         }
 
-        .button-group {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            margin-top: 20px;
-        }
-
-        button {
-            background: linear-gradient(90deg, #0f2027, #203a43, #2c5364);
-            color: #ffffff;
-            border: none;
-            border-radius: 12px;
-            padding: 14px;
+        p {
             font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            margin-bottom: 24px;
+            color: #dcdcdc;
         }
 
-        button:hover {
-            transform: scale(1.05);
-            box-shadow: 0 5px 15px rgba(0, 255, 255, 0.5);
+        .input-wrapper {
+            position: relative;
+        }
+
+        input[type="text"] {
+            width: calc(100% - 20px); /* Увеличена ширина */
+            padding: 14px; /* Увеличена высота */
+            border-radius: 10px;
+            border: 1px solid #333333;
+            outline: none;
+            font-size: 18px;
+            background: #1e1e1e;
+            color: #ffffff;
+        }
+
+        input[type="text"]::placeholder {
+            color: #6e6e6e;
         }
 
         .clear-icon {
@@ -69,48 +70,38 @@
             display: none;
         }
 
-        .input-wrapper {
-            position: relative;
-            margin-top: 10px;
-        }
-
-        input {
-            width: 100%;
-            padding: 14px;
-            border-radius: 10px;
-            border: 1px solid #333;
-            background: #1e1e1e;
-            color: #ffffff;
-            font-size: 16px;
-        }
-
-        input:focus {
-            outline: none;
-            border-color: #00ffff;
-        }
-
-        input:not(:placeholder-shown) + .clear-icon {
+        input[type="text"]:not(:placeholder-shown) + .clear-icon {
             display: block;
         }
 
-        .icon-group {
-            display: flex;
-            justify-content: space-around;
-            margin-top: 20px;
-        }
-
-        .icon {
-            background: linear-gradient(90deg, #ff7f7f, #ff4f4f);
-            color: white;
-            border-radius: 50%;
-            padding: 10px;
+        button {
+            background: linear-gradient(90deg, #0f2027, #203a43, #2c5364);
+            color: #ffffff;
+            border: none;
+            border-radius: 12px;
+            padding: 14px 25px; /* Увеличены размеры кнопки */
+            font-size: 18px;
+            font-weight: bold;
             cursor: pointer;
-            font-size: 20px;
-            transition: transform 0.2s;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            margin-top: 25px; /* Добавлено пространство между строкой и кнопкой */
         }
 
-        .icon:hover {
-            transform: scale(1.2);
+        button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(0, 255, 255, 0.5);
+        }
+
+        .interactive-text {
+            font-size: 14px;
+            margin-top: 20px; /* Отодвинута ниже кнопки */
+            color: #00ffff;
+            animation: pulse 2s infinite;
+            cursor: pointer;
+        }
+
+        .interactive-text:hover {
+            text-decoration: underline;
         }
 
         @keyframes glow {
@@ -122,145 +113,91 @@
             }
         }
 
-        .modal {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-            z-index: 1000;
-            display: none;
-            color: black;
-            width: 90%;
-            max-width: 400px;
-        }
-
-        .modal-header {
-            font-size: 20px;
-            margin-bottom: 10px;
-        }
-
-        .modal-body {
-            font-size: 14px;
-            margin-bottom: 20px;
-        }
-
-        .modal-close {
-            background: red;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            padding: 10px;
-            cursor: pointer;
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 0.8;
+            }
+            50% {
+                opacity: 1;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>Navigation Mini App</h1>
-
+        <p>Enter an address, street, or place to search:</p>
         <div class="input-wrapper">
-            <input id="searchInput" type="text" placeholder="Enter location...">
-            <span class="clear-icon" onclick="clearInput()">&times;</span>
+            <input type="text" id="searchInput" placeholder="Enter location...">
+            <span class="clear-icon" onclick="clearInput()">✖</span>
         </div>
-
-        <div class="button-group">
-            <button onclick="openSearchDialog()">Search / Route Options</button>
-            <button onclick="shareAddress()">Share Address</button>
-            <button onclick="viewHistory()">View History</button>
-        </div>
-
-        <div class="icon-group">
-            <span class="icon" onclick="setFavorite('Home')">🏠</span>
-            <span class="icon" onclick="setFavorite('Work')">💼</span>
-            <span class="icon" onclick="setFavorite('Shop')">🍔</span>
-        </div>
-    </div>
-
-    <div id="modal" class="modal">
-        <div class="modal-header">How to Use</div>
-        <div class="modal-body">
-            Enter a location (e.g., "Sagrada Familia" or "Carrer de Llull 203").
-            <br>Click "Search / Route" to choose how to search.
-            <br>Save addresses using the Home, Work, or Shop icons.
-        </div>
-        <button class="modal-close" onclick="closeModal()">Close</button>
+        <button onclick="search()">Search</button>
+        <div class="interactive-text" onclick="showExample()">Need ideas? Click here!</div>
     </div>
 
     <script>
-        const history = [];
+        function search() {
+            const query = document.getElementById('searchInput').value.trim();
+            if (!query) {
+                alert("Please enter a location to search!");
+                return;
+            }
+
+            const isAddress = /\d+/.test(query); // Если содержит цифры — вероятно адрес
+            const isStreet = /\b(street|avenue|road|boulevard|drive|lane|carrer|calle)\b/i.test(query); // Проверка на улицу
+            const isMetro = /\b(station|metro|underground|subway)\b/i.test(query) || /Sagrera|Verdaguer|Diagonal|Passeig de Gràcia/i.test(query); // Станции метро
+            const isPlace = /\b(plaza|square|park|area)\b/i.test(query); // Проверка на площадь или область
+
+            let googleMapsUrl;
+
+            if (isAddress) {
+                // Для точного адреса — маршрут
+                googleMapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(query)}`;
+            } else if (isStreet) {
+                // Для улиц выделяем её
+                googleMapsUrl = `https://www.google.com/maps/search/${encodeURIComponent(query)}`;
+            } else if (isMetro) {
+                // Для станций метро — маршрут
+                googleMapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(query)}`;
+            } else if (isPlace) {
+                // Для площади или области
+                googleMapsUrl = `https://www.google.com/maps/search/${encodeURIComponent(query)}`;
+            } else {
+                // Для поиска мест добавляем "near me"
+                googleMapsUrl = `https://www.google.com/maps/search/${encodeURIComponent(query)}+near+me`;
+            }
+
+            window.open(googleMapsUrl, '_blank');
+        }
 
         function clearInput() {
-            document.getElementById('searchInput').value = '';
+            const searchInput = document.getElementById('searchInput');
+            searchInput.value = '';
+            searchInput.focus();
         }
 
-        function openSearchDialog() {
-            const query = document.getElementById('searchInput').value.trim();
-            if (!query) {
-                alert('Please enter a location.');
-                return;
-            }
-
-            const searchType = prompt(
-                'Choose an option: \n1. Route \n2. Search place \n3. Find nearby',
-                '1'
-            );
-
-            let googleUrl;
-            switch (searchType) {
-                case '1':
-                    googleUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(query)}`;
-                    break;
-                case '2':
-                    googleUrl = `https://www.google.com/maps/search/${encodeURIComponent(query)}`;
-                    break;
-                case '3':
-                    googleUrl = `https://www.google.com/maps/search/${encodeURIComponent(query)}+near+me`;
-                    break;
-                default:
-                    alert('Invalid choice.');
-                    return;
-            }
-
-            history.push(query);
-            window.open(googleUrl, '_blank');
-        }
-
-        function shareAddress() {
-            const query = document.getElementById('searchInput').value.trim();
-            if (!query) {
-                alert('Please enter a location to share.');
-                return;
-            }
-
-            navigator.clipboard.writeText(query).then(() => {
-                alert('Address copied to clipboard!');
-            });
-        }
-
-        function viewHistory() {
-            if (history.length === 0) {
-                alert('No history found.');
-                return;
-            }
-
-            const historyList = history.join('\n');
-            alert(`Search History:\n${historyList}`);
-        }
-
-        function setFavorite(place) {
-            alert(`${place} location saved!`);
-        }
-
-        function closeModal() {
-            document.getElementById('modal').style.display = 'none';
-        }
-
-        function showModal() {
-            document.getElementById('modal').style.display = 'block';
+        function showExample() {
+            const examples = [
+                "Restaurants",
+                "Carrer de Llull",
+                "Coffee shops",
+                "Plaza Catalunya",
+                "ATMs",
+                "Pharmacies",
+                "Sagrada Familia",
+                "Metro Sagrera",
+                "Shopping malls",
+                "Carrer de Balmes",
+                "Fast food",
+                "Gyms",
+                "Bookstores",
+                "Tabac shops",
+                "Hospitals",
+                "Parking lots",
+                "Public transport"
+            ];
+            const randomExample = examples[Math.floor(Math.random() * examples.length)];
+            document.getElementById('searchInput').value = randomExample;
         }
     </script>
 </body>
