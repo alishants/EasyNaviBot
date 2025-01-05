@@ -82,7 +82,7 @@
         }
 
         input[type="text"] {
-            width: calc(100% - 20px);
+            width: calc(100% - 40px);
             padding: 14px;
             border-radius: 10px;
             border: 1px solid var(--input-border-color);
@@ -96,6 +96,21 @@
         input[type="text"]:focus {
             border-color: var(--title-color);
             box-shadow: 0 0 8px var(--title-color);
+        }
+
+        .clear-icon {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 18px;
+            color: var(--icon-color);
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+
+        .clear-icon:hover {
+            color: var(--title-color);
         }
 
         button {
@@ -188,6 +203,7 @@
         <h1 onclick="toggleTheme()">Navigation Mini App</h1>
         <div class="input-wrapper">
             <input type="text" id="searchInput" placeholder="Enter location...">
+            <span class="clear-icon" onclick="clearInput()">✖</span>
         </div>
         <button onclick="search()">Search</button>
         <div class="interactive-text" onclick="showExample()">Need ideas? Click here!</div>
@@ -303,6 +319,10 @@
             document.getElementById("searchInput").value = randomExample;
         }
 
+        function clearInput() {
+            document.getElementById("searchInput").value = '';
+        }
+
         // Initialize history on page load
         updateHistoryList();
         // Set default theme to dark
@@ -310,5 +330,3 @@
     </script>
 </body>
 </html>
-
-
