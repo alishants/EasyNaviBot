@@ -12,9 +12,9 @@
             color: #ffffff;
             display: flex;
             justify-content: center;
-            align-items: center;
+            align-items: flex-start;
             min-height: 100vh;
-            padding: 0;
+            padding-top: 80px; /* Увеличенный top padding */
         }
 
         .container {
@@ -116,11 +116,22 @@
     <script>
         function search() {
             const query = document.getElementById('searchInput').value.trim();
-            if (query) {
-                const googleMapsUrl = `https://www.google.com/maps/search/${encodeURIComponent(query)} near me`;
+            if (!query) {
+                alert("Please enter a location to search!");
+                return;
+            }
+
+            // Определяем, это адрес или общий запрос
+            const isAddress = /\d+|\b(street|avenue|road|boulevard|drive|lane)\b/i.test(query);
+
+            if (isAddress) {
+                // Логика для адреса
+                const googleMapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`;
                 window.open(googleMapsUrl, '_blank');
             } else {
-                alert("Please enter a location to search!");
+                // Логика для поиска места "near me"
+                const googleMapsUrl = `https://www.google.com/maps/search/${encodeURIComponent(query)}+near+me`;
+                window.open(googleMapsUrl, '_blank');
             }
         }
 
