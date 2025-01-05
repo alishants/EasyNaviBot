@@ -79,6 +79,17 @@
             margin-top: 20px;
         }
 
+        .interactive-text {
+            font-size: 14px;
+            margin-top: 20px;
+            color: var(--title-color);
+            cursor: pointer;
+        }
+
+        .interactive-text:hover {
+            text-decoration: underline;
+        }
+
         .modal {
             position: fixed;
             top: 50%;
@@ -132,6 +143,7 @@
             <input type="text" id="searchInput" placeholder="Enter location...">
         </div>
         <button onclick="search()">Search</button>
+        <div class="interactive-text" onclick="showExample()">Need ideas? Click here!</div>
         <h3>Search History</h3>
         <ul class="history-list" id="historyList"></ul>
     </div>
@@ -197,6 +209,30 @@
         function toggleHelpModal() {
             const helpModal = document.getElementById("helpModal");
             helpModal.classList.toggle("active");
+        }
+
+        function showExample() {
+            const examples = [
+                "Restaurants",
+                "Carrer de Llull",
+                "Coffee shops",
+                "Plaza Catalunya",
+                "ATMs",
+                "Pharmacies",
+                "Sagrada Familia",
+                "Metro Sagrera",
+                "Shopping malls",
+                "Carrer de Balmes",
+                "Fast food",
+                "Gyms",
+                "Bookstores",
+                "Tabac shops",
+                "Hospitals",
+                "Parking lots",
+                "Public transport"
+            ];
+            const randomExample = examples[Math.floor(Math.random() * examples.length)];
+            document.getElementById("searchInput").value = randomExample;
         }
 
         // Initialize history on page load
