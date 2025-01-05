@@ -12,15 +12,7 @@
             --button-bg: linear-gradient(90deg, #0f2027, #203a43, #2c5364);
             --title-color: #00ffff;
             --shadow-color: rgba(0, 255, 255, 0.5);
-        }
-
-        .light-theme {
-            --bg-color: #ffffff;
-            --container-bg: #f9f9f9;
-            --text-color: #000000;
-            --button-bg: linear-gradient(90deg, #d9e4f5, #b0c4de, #a1bdd8);
-            --title-color: #0077ff;
-            --shadow-color: rgba(0, 123, 255, 0.5);
+            --icon-color: #ff4d4d;
         }
 
         body {
@@ -33,7 +25,6 @@
             align-items: flex-start;
             min-height: 100vh;
             padding-top: 80px;
-            transition: background 0.3s ease, color 0.3s ease;
         }
 
         .container {
@@ -45,20 +36,21 @@
             max-width: 400px;
             width: 100%;
             position: relative;
-            transition: background 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .help-icon {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 24px;
+            color: var(--icon-color);
+            cursor: pointer;
         }
 
         h1 {
             font-size: 28px;
             margin-bottom: 20px;
             color: var(--title-color);
-            cursor: pointer;
-            animation: glow 2s infinite;
-        }
-
-        p {
-            font-size: 16px;
-            margin-bottom: 24px;
         }
 
         .input-wrapper {
@@ -76,25 +68,6 @@
             color: var(--text-color);
         }
 
-        input[type="text"]::placeholder {
-            color: #6e6e6e;
-        }
-
-        .clear-icon {
-            position: absolute;
-            right: 10px;
-            top: 50%;
-            transform: translateY(-50%);
-            font-size: 16px;
-            color: var(--text-color);
-            cursor: pointer;
-            display: none;
-        }
-
-        input[type="text"]:not(:placeholder-shown) + .clear-icon {
-            display: block;
-        }
-
         button {
             background: var(--button-bg);
             color: var(--text-color);
@@ -102,38 +75,8 @@
             border-radius: 12px;
             padding: 14px 25px;
             font-size: 18px;
-            font-weight: bold;
             cursor: pointer;
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
-            margin-top: 25px;
-        }
-
-        button:hover {
-            transform: scale(1.05);
-            box-shadow: 0 5px 15px var(--shadow-color);
-        }
-
-        .interactive-text {
-            font-size: 14px;
-            margin: 15px 0;
-            color: var(--title-color);
-            animation: pulse 2s infinite;
-            cursor: pointer;
-        }
-
-        .interactive-text:hover {
-            text-decoration: underline;
-        }
-
-        .history-btn {
-            margin-top: 15px;
-            font-size: 16px;
-            padding: 10px 20px;
-            background: var(--title-color);
-            color: var(--text-color);
-            border-radius: 12px;
-            cursor: pointer;
-            display: inline-block;
+            margin-top: 20px;
         }
 
         .modal {
@@ -163,117 +106,86 @@
             margin-bottom: 10px;
         }
 
-        @keyframes glow {
-            0%, 100% {
-                text-shadow: 0 0 5px var(--title-color), 0 0 10px var(--title-color), 0 0 20px var(--title-color);
-            }
-            50% {
-                text-shadow: 0 0 10px var(--title-color), 0 0 20px var(--title-color), 0 0 40px var(--title-color);
-            }
+        ul.history-list {
+            list-style: none;
+            padding: 0;
+            margin-top: 10px;
         }
 
-        @keyframes pulse {
-            0%, 100% {
-                opacity: 0.8;
-            }
-            50% {
-                opacity: 1;
-            }
+        ul.history-list li {
+            padding: 10px;
+            border-bottom: 1px solid #ccc;
+            cursor: pointer;
+            text-align: left;
+        }
+
+        ul.history-list li:hover {
+            background-color: rgba(0, 255, 255, 0.1);
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1 onclick="toggleTheme()">Navigation Mini App</h1>
+        <span class="help-icon" onclick="toggleHelpModal()">❓</span>
+        <h1>Navigation Mini App</h1>
         <div class="input-wrapper">
             <input type="text" id="searchInput" placeholder="Enter location...">
-            <span class="clear-icon" onclick="clearInput()">✖</span>
         </div>
-        <div class="interactive-text" onclick="showExample()">Need ideas? Click here!</div>
         <button onclick="search()">Search</button>
-        <button class="history-btn" onclick="showHistory()">History</button>
-        <div class="modal" id="helpModal">
-            <div class="close-modal" onclick="closeModal()">✖</div>
-            <p><strong>Examples:</strong></p>
-            <p>Street: Carrer de Llull</p>
-            <p>Metro: Metro Diagonal</p>
-            <p>Place: Sagrada Familia</p>
-        </div>
+        <h3>Search History</h3>
+        <ul class="history-list" id="historyList"></ul>
+    </div>
+
+    <div class="modal" id="helpModal">
+        <div class="close-modal" onclick="toggleHelpModal()">✖</div>
+        <h2>Search Help</h2>
+        <p><strong>Examples:</strong></p>
+        <p>Street: <i>Carrer de Llull</i></p>
+        <p>Metro: <i>Metro Diagonal</i></p>
+        <p>Place: <i>Sagrada Familia</i></p>
+        <p>Address: <i>Carrer de Llull 203</i></p>
     </div>
 
     <script>
-        let theme = 'dark';
-
-        function toggleTheme() {
-            document.body.classList.toggle('light-theme');
-            theme = theme === 'dark' ? 'light' : 'dark';
-        }
-
-        function clearInput() {
-            document.getElementById('searchInput').value = '';
-        }
+        const historyList = document.getElementById("historyList");
 
         function search() {
-            const query = document.getElementById('searchInput').value.trim();
+            const query = document.getElementById("searchInput").value.trim();
             if (!query) {
                 alert("Please enter a location to search!");
                 return;
             }
-            const googleMapsUrl = `https://www.google.com/maps/search/${encodeURIComponent(query)}`;
-            window.open(googleMapsUrl, '_blank');
+            const url = `https://www.google.com/maps/search/${encodeURIComponent(query)}`;
+            window.open(url, "_blank");
             saveToHistory(query);
-        }
-
-        function showExample() {
-            const examples = [
-                "Restaurants",
-                "Carrer de Llull",
-                "Coffee shops",
-                "Plaza Catalunya",
-                "ATMs",
-                "Pharmacies",
-                "Sagrada Familia",
-                "Metro Sagrera",
-                "Shopping malls",
-                "Carrer de Balmes",
-                "Fast food",
-                "Gyms",
-                "Bookstores",
-                "Tabac shops",
-                "Hospitals",
-                "Parking lots",
-                "Public transport"
-            ];
-            const randomExample = examples[Math.floor(Math.random() * examples.length)];
-            document.getElementById('searchInput').value = randomExample;
+            updateHistoryList();
         }
 
         function saveToHistory(query) {
-            const history = JSON.parse(localStorage.getItem('searchHistory') || '[]');
+            const history = JSON.parse(localStorage.getItem("searchHistory") || "[]");
             if (!history.includes(query)) {
                 history.unshift(query);
-                if (history.length > 50) history.pop();
-                localStorage.setItem('searchHistory', JSON.stringify(history));
+                if (history.length > 10) history.pop();
+                localStorage.setItem("searchHistory", JSON.stringify(history));
             }
         }
 
-        function showHistory() {
-            const history = JSON.parse(localStorage.getItem('searchHistory') || '[]');
-            if (history.length === 0) {
-                alert("No history yet.");
-                return;
-            }
-            const historyList = history.map(item => `<li onclick="setSearch('${item}')">${item}</li>`).join('');
-            alert("Recent Searches:\n" + history.join("\n"));
+        function updateHistoryList() {
+            const history = JSON.parse(localStorage.getItem("searchHistory") || "[]");
+            historyList.innerHTML = history.map(item => `<li onclick="setSearch('${item}')">${item}</li>`).join("");
         }
 
         function setSearch(value) {
-            document.getElementById('searchInput').value = value;
+            document.getElementById("searchInput").value = value;
         }
 
-        function closeModal() {
-            document.getElementById('helpModal').classList.remove('active');
+        function toggleHelpModal() {
+            const helpModal = document.getElementById("helpModal");
+            helpModal.classList.toggle("active");
         }
+
+        // Initialize history on page load
+        updateHistoryList();
     </script>
 </body>
 </html>
