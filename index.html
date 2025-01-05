@@ -166,60 +166,77 @@
         const historyList = document.getElementById("historyList");
         const body = document.body;
 
-        function search() {
-            const query = document.getElementById("searchInput").value.trim();
-            if (!query) {
-                alert("Please enter a location to search!");
-                return;
-            }
+function search() {
+    const query = document.getElementById("searchInput").value.trim();
+    if (!query) {
+        alert("Please enter a location to search!");
+        return;
+    }
 
-            const isAddress = /\d+/.test(query);
-            const isStreet = /\b(street|avenue|road|boulevard|drive|lane|carrer|calle)\b/i.test(query);
-            const isMetro = /\b(station|metro|underground|subway)\b/i.test(query);
-            const isPlace = /\b(plaza|square|park|area)\b/i.test(query);
+    const isAddress = /\d+/.test(query); // Проверка, это ли конкретный адрес
+    const isStreet = /\b(street|avenue|road|boulevard|drive|lane|carrer|calle)\b/i.test(query);
+    const isMetro = /\b(station|metro|underground|subway)\b/i.test(query) || /Sagrera|Verdaguer|Diagonal|Passeig de Gràcia/i.test(query);
+    const isPlace = /\b(plaza|square|park|area)\b/i.test(query);
 
-            let googleMapsUrl;
-            if (isAddress || isMetro) {
-                googleMapsUrl = `https://www.google.com/maps/embed/v1/directions?key=AIzaSyBATkE39afAqUS7riPFCyKsmpkPTwdPpDI&destination=${encodeURIComponent(query)}`;
-            } else {
-                googleMapsUrl = `https://www.google.com/maps/embed/v1/search?key=AIzaSyBATkE39afAqUS7riPFCyKsmpkPTwdPpDI&q=${encodeURIComponent(query)}`;
-            }
+    // Определяем функцию для работы с геолокацией
+    function useCurrentLocation(callback) {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    const { latitude, longitude } = position.coords;
+                    callback(latitude, longitude);
+                },
+                (error) => {
+                    alert("Unable to retrieve your location. Please allow location access or enter a location manually.");
+                    callback(null, null);
+                }
+            );
+        } else {
+            alert("Geolocation is not supported by your browser.");
+            callback(null, null);
+        }
+    }
 
-            document.getElementById("mapResult").src = googleMapsUrl;
-            document.getElementById("resultContainer").style.display = "block";
+    // Получаем URL для Google Maps
+    function generateGoogleMapsUrl(origin, query) {
+        if (isAddress || isMetro) {
+            return `https://www.google.com/maps/embed/v1/directions?key=AIzaSyBATkE39afAqUS7riPFCyKsmpkPTwdPpDI&origin=${encodeURIComponent(origin)}&destination=${encodeURIComponent(query)}`;
+        } else if (isStreet || isPlace) {
+            return `https://www.google.com/maps/embed/v1/search?key=AIzaSyBATkE39afAqUS7riPFCyKsmpkPTwdPpDI&q=${encodeURIComponent(query)}`;
+        } else {
+            return `https://www.google.com/maps/embed/v1/search?key=AIzaSyBATkE39afAqUS7riPFCyKsmpkPTwdPpDI&q=${encodeURIComponent(query)}+near+me`;
+        }
+    }
+
+    // Если нужно конкретное направление, определяем текущую геолокацию
+    if (isAddress || isMetro) {
+        useCurrentLocation((latitude, longitude) => {
+            const origin = latitude && longitude ? `${latitude},${longitude}` : "Barcelona"; // Укажите "Barcelona" как fallback
+            const googleMapsUrl = generateGoogleMapsUrl(origin, query);
+
+            // Отображаем результат внутри iframe
+            const resultContainer = document.getElementById("resultContainer");
+            const mapResult = document.getElementById("mapResult");
+
+            mapResult.src = googleMapsUrl;
+            resultContainer.style.display = "block";
 
             saveToHistory(query);
             updateHistoryList();
-        }
+        });
+    } else {
+        const googleMapsUrl = generateGoogleMapsUrl("Barcelona", query); // Fallback origin
+        const resultContainer = document.getElementById("resultContainer");
+        const mapResult = document.getElementById("mapResult");
 
-        function saveToHistory(query) {
-            const history = JSON.parse(localStorage.getItem("searchHistory") || "[]");
-            if (!history.includes(query)) {
-                history.unshift(query);
-                if (history.length > 10) history.pop();
-                localStorage.setItem("searchHistory", JSON.stringify(history));
-            }
-        }
+        mapResult.src = googleMapsUrl;
+        resultContainer.style.display = "block";
 
-        function updateHistoryList() {
-            const history = JSON.parse(localStorage.getItem("searchHistory") || "[]");
-            historyList.innerHTML = history.map(item => `<li onclick="setSearch('${item}')">${item}</li>`).join("");
-        }
-
-        function setSearch(value) {
-            document.getElementById("searchInput").value = value;
-        }
-
-        function toggleTheme() {
-            body.dataset.theme = body.dataset.theme === "light" ? "dark" : "light";
-        }
-
-        function showExample() {
-            const examples = ["Restaurants", "Carrer de Llull", "Coffee shops"];
-            document.getElementById("searchInput").value = examples[Math.floor(Math.random() * examples.length)];
-        }
-
+        saveToHistory(query);
         updateHistoryList();
+    }
+}
+
         body.dataset.theme = "dark";
     </script>
 </body>
