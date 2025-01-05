@@ -212,12 +212,28 @@
         const historyList = document.getElementById("historyList");
         const body = document.body;
 
-        function search() {
-            const query = document.getElementById("searchInput").value.trim();
-            if (!query) {
-                alert("Please enter a location to search!");
-                return;
-            }
+function search() {
+    const query = document.getElementById("searchInput").value.trim();
+    if (!query) {
+        alert("Please enter a location to search!");
+        return;
+    }
+
+    let googleMapsUrl;
+
+    if (/Android/i.test(navigator.userAgent)) {
+        // Для Android используем geo-схему
+        googleMapsUrl = `geo:0,0?q=${encodeURIComponent(query)}`;
+    } else {
+        // Для других платформ используем https
+        googleMapsUrl = `https://www.google.com/maps/search/${encodeURIComponent(query)}`;
+    }
+
+    window.open(googleMapsUrl, "_blank");
+    saveToHistory(query);
+    updateHistoryList();
+}
+
 
             const isAddress = /\d+/.test(query);
             const isStreet = /\b(street|avenue|road|boulevard|drive|lane|carrer|calle)\b/i.test(query);
