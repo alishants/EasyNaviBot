@@ -1,4 +1,4 @@
-<!DOCTYPE html> 
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -78,6 +78,13 @@
             color: var(--highlight-color);
         }
 
+        iframe {
+            margin-top: 20px;
+            width: 100%;
+            height: 300px;
+            border: 0;
+        }
+
         @keyframes glow {
             0%, 100% {
                 text-shadow: 0 0 5px var(--highlight-color), 0 0 10px var(--highlight-color), 0 0 20px var(--highlight-color);
@@ -93,9 +100,9 @@
     <div class="container">
         <h1>Navigation Mini App</h1>
         <p>Enter an address, street, or place to search:</p>
-        <div class="input-wrapper">
+        <div>
             <input type="text" id="searchInput" placeholder="Enter location...">
-            <span class="clear-icon" onclick="clearInput()">✖</span>
+            <button onclick="clearInput()">Clear</button>
         </div>
         <div class="button-group">
             <button onclick="search()">Search</button>
@@ -103,13 +110,15 @@
             <button onclick="addWaypoint()">Add Waypoint</button>
         </div>
         <div class="interactive-text" onclick="showExample()">Need ideas? Click here!</div>
-        <div id="mapContainer" style="margin-top: 20px;"></div>
+        <div id="mapContainer"></div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
     <script>
-        const localStorageKey = "customTheme";
+        let waypoints = [];
+        const mapContainer = document.getElementById('mapContainer');
 
+        // Search function
         function search() {
             const query = document.getElementById('searchInput').value.trim();
             if (!query) {
@@ -117,48 +126,66 @@
                 return;
             }
 
-            // Embed Google Maps iframe
-            const mapContainer = document.getElementById('mapContainer');
-            mapContainer.innerHTML = `<iframe
-                width="100%"
-                height="300"
-                frameborder="0"
-                style="border:0"
-                src="https://www.google.com/maps/embed/v1/place?key=YOUR_API_KEY&q=${encodeURIComponent(query)}"
-                allowfullscreen>
-            </iframe>`;
+            const apiKey = "YOUR_API_KEY"; // Replace with your Google Maps API key
+            const mapUrl = `https://www.google.com/maps/embed/v1/place?key=${apiKey}&q=${encodeURIComponent(query)}`;
+
+            mapContainer.innerHTML = `<iframe src="${mapUrl}" allowfullscreen></iframe>`;
         }
 
+        // Clear input field
+        function clearInput() {
+            const searchInput = document.getElementById('searchInput');
+            searchInput.value = '';
+            searchInput.focus();
+        }
+
+        // Save current route as image
         function saveRoute() {
             html2canvas(document.body).then(canvas => {
-                const link = document.createElement("a");
-                link.href = canvas.toDataURL("image/png");
-                link.download = "route.png";
+                const link = document.createElement('a');
+                link.download = 'route.png';
+                link.href = canvas.toDataURL('image/png');
                 link.click();
             });
         }
 
+        // Add waypoint
         function addWaypoint() {
             const waypoint = prompt("Enter an additional location:");
             if (waypoint) {
-                const input = document.getElementById('searchInput');
-                input.value += ` -> ${waypoint}`;
+                waypoints.push(waypoint);
+                alert(`Waypoint added: ${waypoint}`);
             }
         }
 
+        // Show example input
+        function showExample() {
+            const examples = [
+                "Restaurants",
+                "Carrer de Llull",
+                "Coffee shops",
+                "Plaza Catalunya",
+                "Sagrada Familia",
+                "Metro Sagrera"
+            ];
+            const randomExample = examples[Math.floor(Math.random() * examples.length)];
+            document.getElementById('searchInput').value = randomExample;
+        }
+
+        // Toggle theme
         function toggleTheme() {
             const root = document.documentElement;
-            const isDark = root.style.getPropertyValue('--bg-color') === 'linear-gradient(135deg, #ffffff, #f1f1f1)';
+            const isDark = getComputedStyle(root).getPropertyValue('--bg-color').includes('000000');
             if (isDark) {
-                root.style.setProperty('--bg-color', 'linear-gradient(135deg, #000000, #1a1a1a)');
-                root.style.setProperty('--text-color', '#ffffff');
-                root.style.setProperty('--highlight-color', '#00ffff');
-                root.style.setProperty('--button-bg', 'linear-gradient(90deg, #0f2027, #203a43, #2c5364)');
-            } else {
                 root.style.setProperty('--bg-color', 'linear-gradient(135deg, #ffffff, #f1f1f1)');
                 root.style.setProperty('--text-color', '#000000');
                 root.style.setProperty('--highlight-color', '#007acc');
                 root.style.setProperty('--button-bg', 'linear-gradient(90deg, #e0e0e0, #cfcfcf, #bfbfbf)');
+            } else {
+                root.style.setProperty('--bg-color', 'linear-gradient(135deg, #000000, #1a1a1a)');
+                root.style.setProperty('--text-color', '#ffffff');
+                root.style.setProperty('--highlight-color', '#00ffff');
+                root.style.setProperty('--button-bg', 'linear-gradient(90deg, #0f2027, #203a43, #2c5364)');
             }
         }
     </script>
