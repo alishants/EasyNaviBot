@@ -115,7 +115,7 @@
 
         .interactive-text {
             font-size: 14px;
-            margin-top: 20px;
+            margin: 15px 0;
             color: var(--title-color);
             animation: pulse 2s infinite;
             cursor: pointer;
@@ -185,15 +185,13 @@
 <body>
     <div class="container">
         <h1 onclick="toggleTheme()">Navigation Mini App</h1>
-        <p>Enter an address, street, or place to search:</p>
         <div class="input-wrapper">
             <input type="text" id="searchInput" placeholder="Enter location...">
             <span class="clear-icon" onclick="clearInput()">✖</span>
         </div>
+        <div class="interactive-text" onclick="showExample()">Need ideas? Click here!</div>
         <button onclick="search()">Search</button>
         <button class="history-btn" onclick="showHistory()">History</button>
-        <button onclick="copyAddress()">Share Address</button>
-        <span class="interactive-text" onclick="showExample()">Need ideas? Click here!</span>
         <div class="modal" id="helpModal">
             <div class="close-modal" onclick="closeModal()">✖</div>
             <p><strong>Examples:</strong></p>
@@ -211,23 +209,66 @@
             theme = theme === 'dark' ? 'light' : 'dark';
         }
 
-        function copyAddress() {
-            const query = document.getElementById('searchInput').value.trim();
-            if (!query) {
-                alert("No address to copy!");
-                return;
-            }
-            navigator.clipboard.writeText(query);
-            alert("Address copied!");
-        }
-
         function clearInput() {
             document.getElementById('searchInput').value = '';
         }
 
+        function search() {
+            const query = document.getElementById('searchInput').value.trim();
+            if (!query) {
+                alert("Please enter a location to search!");
+                return;
+            }
+            const googleMapsUrl = `https://www.google.com/maps/search/${encodeURIComponent(query)}`;
+            window.open(googleMapsUrl, '_blank');
+            saveToHistory(query);
+        }
+
+        function showExample() {
+            const examples = [
+                "Restaurants",
+                "Carrer de Llull",
+                "Coffee shops",
+                "Plaza Catalunya",
+                "ATMs",
+                "Pharmacies",
+                "Sagrada Familia",
+                "Metro Sagrera",
+                "Shopping malls",
+                "Carrer de Balmes",
+                "Fast food",
+                "Gyms",
+                "Bookstores",
+                "Tabac shops",
+                "Hospitals",
+                "Parking lots",
+                "Public transport"
+            ];
+            const randomExample = examples[Math.floor(Math.random() * examples.length)];
+            document.getElementById('searchInput').value = randomExample;
+        }
+
+        function saveToHistory(query) {
+            const history = JSON.parse(localStorage.getItem('searchHistory') || '[]');
+            if (!history.includes(query)) {
+                history.unshift(query);
+                if (history.length > 50) history.pop();
+                localStorage.setItem('searchHistory', JSON.stringify(history));
+            }
+        }
+
         function showHistory() {
             const history = JSON.parse(localStorage.getItem('searchHistory') || '[]');
-            alert(history.join('\n') || 'No history yet.');
+            if (history.length === 0) {
+                alert("No history yet.");
+                return;
+            }
+            const historyList = history.map(item => `<li onclick="setSearch('${item}')">${item}</li>`).join('');
+            alert("Recent Searches:\n" + history.join("\n"));
+        }
+
+        function setSearch(value) {
+            document.getElementById('searchInput').value = value;
         }
 
         function closeModal() {
