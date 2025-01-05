@@ -211,7 +211,8 @@
                 googleMapsUrl = `https://www.google.com/maps/search/${encodeURIComponent(query)}+near+me`;
             }
 
-            window.open(googleMapsUrl, "_blank");
+            location.href = googleMapsUrl;
+
             saveToHistory(query);
             updateHistoryList();
         }
