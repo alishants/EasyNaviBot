@@ -94,8 +94,8 @@
         }
 
         input[type="text"] {
-            width: 90%; /* Уменьшенная ширина */
-            padding: 14px 40px 14px 20px; /* Добавлено место для крестика */
+            width: 100%;
+            padding: 14px 20px;
             border-radius: 30px;
             border: 2px solid var(--input-border-color);
             outline: none;
@@ -109,22 +109,6 @@
         input[type="text"]:focus {
             border-color: var(--title-color);
             box-shadow: 0 6px 15px var(--shadow-color);
-        }
-
-        .clear-icon {
-            position: absolute;
-            right: 10px;
-            top: 50%;
-            transform: translateY(-50%);
-            font-size: 16px;
-            color: var(--icon-color);
-            cursor: pointer;
-            opacity: 0.8;
-            transition: opacity 0.3s ease-in-out;
-        }
-
-        .clear-icon:hover {
-            opacity: 1;
         }
 
         button {
@@ -221,7 +205,6 @@
         <h1 onclick="toggleTheme()">Navigation Mini App</h1>
         <div class="input-wrapper">
             <input type="text" id="searchInput" placeholder="Enter location...">
-            <span class="clear-icon" onclick="clearInput()">✖</span>
         </div>
         <button onclick="search()">Search</button>
         <div class="interactive-text" onclick="showExample()">Need ideas? Click here!</div>
@@ -241,9 +224,104 @@
     </div>
 
     <script>
-        function clearInput() {
-            document.getElementById("searchInput").value = '';
+        // Keep the script part unchanged
+        const historyList = document.getElementById("historyList");
+        const body = document.body;
+
+        function search() {
+            const query = document.getElementById("searchInput").value.trim();
+            if (!query) {
+                alert("Please enter a location to search!");
+                return;
+            }
+
+            const isAddress = /\d+/.test(query);
+            const isStreet = /\b(street|avenue|road|boulevard|drive|lane|carrer|calle)\b/i.test(query);
+            const isMetro = /\b(station|metro|underground|subway)\b/i.test(query) || /Sagrera|Verdaguer|Diagonal|Passeig de Gràcia/i.test(query);
+            const isPlace = /\b(plaza|square|park|area)\b/i.test(query);
+
+            let googleMapsUrl;
+
+            if (isAddress || isMetro) {
+                googleMapsUrl = https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(query)};
+            } else if (isStreet || isPlace) {
+                googleMapsUrl = https://www.google.com/maps/search/${encodeURIComponent(query)};
+            } else {
+                googleMapsUrl = https://www.google.com/maps/search/${encodeURIComponent(query)}+near+me;
+            }
+
+            window.open(googleMapsUrl, "_blank");
+            saveToHistory(query);
+            updateHistoryList();
         }
+
+        function saveToHistory(query) {
+            const history = JSON.parse(localStorage.getItem("searchHistory") || "[]");
+            if (!history.includes(query)) {
+                history.unshift(query);
+                if (history.length > 10) history.pop();
+                localStorage.setItem("searchHistory", JSON.stringify(history));
+            }
+        }
+
+        function updateHistoryList() {
+            const history = JSON.parse(localStorage.getItem("searchHistory") || "[]");
+            historyList.innerHTML = history.map(item => <li onclick="setSearch('${item}')">${item}</li>).join("");
+        }
+
+        function setSearch(value) {
+            document.getElementById("searchInput").value = value;
+        }
+
+        function toggleHelpModal() {
+            const helpModal = document.getElementById("helpModal");
+            helpModal.classList.toggle("active");
+        }
+
+        function toggleTheme() {
+            if (body.dataset.theme === "light") {
+                body.dataset.theme = "dark";
+            } else {
+                body.dataset.theme = "light";
+            }
+        }
+
+        function showExample() {
+            const examples = [
+                "Restaurants",
+                "Carrer",
+                "Carrer de",
+                "Coffee shops",
+                "Plaza Catalunya",
+                "ATMs",
+                "Carrer",
+                "Pharmacies",
+                "Tapas",
+                "Sagrada Familia",
+                "Metro Sagrera",
+                "Shopping malls",
+                "Carrer de",
+                "Plaza",
+                "Metro",
+                "Fast food",
+                "Gyms",
+                "Bookstores",
+                "Shopping malls",
+                "Cafe",
+                "Tabac shops",
+                "Metro",
+                "Hospitals",
+                "Clinics",
+                "Parking lots",
+            ];
+            const randomExample = examples[Math.floor(Math.random() * examples.length)];
+            document.getElementById("searchInput").value = randomExample;
+        }
+
+        // Initialize history on page load
+        updateHistoryList();
+        // Set default theme to dark
+        body.dataset.theme = "dark";
     </script>
 </body>
 
