@@ -107,7 +107,7 @@
 <body>
     <div class="container">
         <h1>Navigation Mini App</h1>
-        <p>Enter an address or place to search:</p>
+        <p>Enter an address, street, or place to search:</p>
         <input type="text" id="searchInput" placeholder="Enter location...">
         <button onclick="search()">Search</button>
         <div class="interactive-text" onclick="showExample()">Need ideas? Click here!</div>
@@ -121,25 +121,32 @@
                 return;
             }
 
-            // Определяем, это адрес или общий запрос
-            const isAddress = /\d+|\b(street|avenue|road|boulevard|drive|lane)\b/i.test(query);
+            // Определяем тип запроса
+            const isAddress = /\d+/.test(query); // Если содержит цифры — вероятно адрес
+            const isStreet = /\b(street|avenue|road|boulevard|drive|lane|carrer|calle)\b/i.test(query); // Если содержит улицу
+
+            let googleMapsUrl;
 
             if (isAddress) {
-                // Логика для адреса
-                const googleMapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`;
-                window.open(googleMapsUrl, '_blank');
+                // Логика для конкретного адреса
+                googleMapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`;
+            } else if (isStreet) {
+                // Логика для поиска только улицы
+                googleMapsUrl = `https://www.google.com/maps/search/${encodeURIComponent(query)}`;
             } else {
-                // Логика для поиска места "near me"
-                const googleMapsUrl = `https://www.google.com/maps/search/${encodeURIComponent(query)}+near+me`;
-                window.open(googleMapsUrl, '_blank');
+                // Логика для поиска мест (добавляет "near me")
+                googleMapsUrl = `https://www.google.com/maps/search/${encodeURIComponent(query)}+near+me`;
             }
+
+            window.open(googleMapsUrl, '_blank');
         }
 
         function showExample() {
             const examples = [
                 "Restaurants",
+                "Carrer de Llull",
                 "Coffee shops",
-                "Gas stations",
+                "Carrer de Balmes",
                 "ATMs",
                 "Pharmacies"
             ];
