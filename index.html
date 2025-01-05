@@ -6,23 +6,21 @@
     <title>Navigation Mini App</title>
     <style>
         :root {
-            --bg-color: #1a1a1a;
+            --bg-color: #000000;
+            --container-bg: rgba(30, 30, 30, 0.9);
             --text-color: #ffffff;
             --button-bg: linear-gradient(90deg, #0f2027, #203a43, #2c5364);
-            --header-color: #00ffff;
-            --modal-bg: #ffffff;
-            --modal-text: #333333;
-            --placeholder-color: #6e6e6e;
+            --title-color: #00ffff;
+            --shadow-color: rgba(0, 255, 255, 0.5);
         }
 
-        body.light-mode {
+        .light-theme {
             --bg-color: #ffffff;
-            --text-color: #333333;
-            --button-bg: linear-gradient(90deg, #ffffff, #dcdcdc, #a5a5a5);
-            --header-color: #005f5f;
-            --modal-bg: #1a1a1a;
-            --modal-text: #ffffff;
-            --placeholder-color: #999999;
+            --container-bg: #f9f9f9;
+            --text-color: #000000;
+            --button-bg: linear-gradient(90deg, #d9e4f5, #b0c4de, #a1bdd8);
+            --title-color: #0077ff;
+            --shadow-color: rgba(0, 123, 255, 0.5);
         }
 
         body {
@@ -35,34 +33,27 @@
             align-items: flex-start;
             min-height: 100vh;
             padding-top: 80px;
-            transition: all 0.3s ease;
+            transition: background 0.3s ease, color 0.3s ease;
         }
 
         .container {
             text-align: center;
-            background: rgba(30, 30, 30, 0.9);
+            background: var(--container-bg);
             border-radius: 20px;
             padding: 30px;
-            box-shadow: 0 10px 25px rgba(0, 255, 255, 0.2);
+            box-shadow: 0 10px 25px var(--shadow-color);
             max-width: 400px;
             width: 100%;
-            transition: all 0.3s ease;
+            position: relative;
+            transition: background 0.3s ease, box-shadow 0.3s ease;
         }
 
         h1 {
             font-size: 28px;
             margin-bottom: 20px;
-            color: var(--header-color);
+            color: var(--title-color);
             cursor: pointer;
-        }
-
-        .help-icon {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            font-size: 24px;
-            color: red;
-            cursor: pointer;
+            animation: glow 2s infinite;
         }
 
         p {
@@ -78,15 +69,30 @@
             width: calc(100% - 20px);
             padding: 14px;
             border-radius: 10px;
-            border: 1px solid #333333;
+            border: 1px solid #ccc;
             outline: none;
             font-size: 18px;
-            background: var(--bg-color);
+            background: var(--container-bg);
             color: var(--text-color);
         }
 
         input[type="text"]::placeholder {
-            color: var(--placeholder-color);
+            color: #6e6e6e;
+        }
+
+        .clear-icon {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 16px;
+            color: var(--text-color);
+            cursor: pointer;
+            display: none;
+        }
+
+        input[type="text"]:not(:placeholder-shown) + .clear-icon {
+            display: block;
         }
 
         button {
@@ -98,13 +104,36 @@
             font-size: 18px;
             font-weight: bold;
             cursor: pointer;
-            margin-top: 15px;
             transition: transform 0.2s ease, box-shadow 0.2s ease;
+            margin-top: 25px;
         }
 
         button:hover {
             transform: scale(1.05);
-            box-shadow: 0 5px 15px rgba(0, 255, 255, 0.5);
+            box-shadow: 0 5px 15px var(--shadow-color);
+        }
+
+        .interactive-text {
+            font-size: 14px;
+            margin-top: 20px;
+            color: var(--title-color);
+            animation: pulse 2s infinite;
+            cursor: pointer;
+        }
+
+        .interactive-text:hover {
+            text-decoration: underline;
+        }
+
+        .history-btn {
+            margin-top: 15px;
+            font-size: 16px;
+            padding: 10px 20px;
+            background: var(--title-color);
+            color: var(--text-color);
+            border-radius: 12px;
+            cursor: pointer;
+            display: inline-block;
         }
 
         .modal {
@@ -112,107 +141,97 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            background: var(--modal-bg);
-            color: var(--modal-text);
+            width: 90%;
+            max-width: 400px;
+            background: var(--container-bg);
+            color: var(--text-color);
             padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+            border-radius: 15px;
+            box-shadow: 0 10px 25px var(--shadow-color);
             display: none;
             z-index: 1000;
-            text-align: center;
-            max-width: 300px;
         }
 
-        .modal.visible {
+        .modal.active {
             display: block;
         }
 
-        .history {
-            margin-top: 20px;
-        }
-
-        .history-item {
+        .close-modal {
+            text-align: right;
+            font-size: 18px;
             cursor: pointer;
-            color: var(--header-color);
-            text-decoration: underline;
+            margin-bottom: 10px;
         }
 
-        .history-item:hover {
-            text-decoration: none;
+        @keyframes glow {
+            0%, 100% {
+                text-shadow: 0 0 5px var(--title-color), 0 0 10px var(--title-color), 0 0 20px var(--title-color);
+            }
+            50% {
+                text-shadow: 0 0 10px var(--title-color), 0 0 20px var(--title-color), 0 0 40px var(--title-color);
+            }
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 0.8;
+            }
+            50% {
+                opacity: 1;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="help-icon" onclick="toggleModal()">?</div>
     <div class="container">
         <h1 onclick="toggleTheme()">Navigation Mini App</h1>
         <p>Enter an address, street, or place to search:</p>
         <div class="input-wrapper">
             <input type="text" id="searchInput" placeholder="Enter location...">
+            <span class="clear-icon" onclick="clearInput()">✖</span>
         </div>
         <button onclick="search()">Search</button>
-        <button onclick="shareAddress()">Share Address</button>
-        <button onclick="showHistory()">View History</button>
-        <div class="history"></div>
-    </div>
-
-    <div class="modal" id="helpModal">
-        <p>Enter a street, address, or place to search:</p>
-        <ul>
-            <li>Street: "Carrer de Llull"</li>
-            <li>Place: "Sagrada Familia"</li>
-            <li>Metro: "Metro Sagrera"</li>
-        </ul>
-        <button onclick="toggleModal()">Close</button>
+        <button class="history-btn" onclick="showHistory()">History</button>
+        <button onclick="copyAddress()">Share Address</button>
+        <span class="interactive-text" onclick="showExample()">Need ideas? Click here!</span>
+        <div class="modal" id="helpModal">
+            <div class="close-modal" onclick="closeModal()">✖</div>
+            <p><strong>Examples:</strong></p>
+            <p>Street: Carrer de Llull</p>
+            <p>Metro: Metro Diagonal</p>
+            <p>Place: Sagrada Familia</p>
+        </div>
     </div>
 
     <script>
-        let history = JSON.parse(localStorage.getItem('searchHistory')) || [];
+        let theme = 'dark';
 
         function toggleTheme() {
-            document.body.classList.toggle('light-mode');
+            document.body.classList.toggle('light-theme');
+            theme = theme === 'dark' ? 'light' : 'dark';
         }
 
-        function toggleModal() {
-            document.getElementById('helpModal').classList.toggle('visible');
-        }
-
-        function search() {
+        function copyAddress() {
             const query = document.getElementById('searchInput').value.trim();
             if (!query) {
-                alert("Please enter a location to search!");
+                alert("No address to copy!");
                 return;
             }
-
-            history.unshift(query);
-            if (history.length > 50) history.pop();
-            localStorage.setItem('searchHistory', JSON.stringify(history));
-
-            alert("Search initiated: " + query);
+            navigator.clipboard.writeText(query);
+            alert("Address copied!");
         }
 
-        function shareAddress() {
-            const query = document.getElementById('searchInput').value.trim();
-            if (!query) {
-                alert("No address to share!");
-                return;
-            }
-
-            navigator.clipboard.writeText(query).then(() => {
-                alert("Address copied!");
-            });
+        function clearInput() {
+            document.getElementById('searchInput').value = '';
         }
 
         function showHistory() {
-            const historyContainer = document.querySelector('.history');
-            historyContainer.innerHTML = '';
-            history.forEach((item, index) => {
-                const div = document.createElement('div');
-                div.textContent = item;
-                div.className = 'history-item';
-                div.onclick = () => (document.getElementById('searchInput').value = item);
-                historyContainer.appendChild(div);
-            });
+            const history = JSON.parse(localStorage.getItem('searchHistory') || '[]');
+            alert(history.join('\n') || 'No history yet.');
+        }
+
+        function closeModal() {
+            document.getElementById('helpModal').classList.remove('active');
         }
     </script>
 </body>
