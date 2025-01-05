@@ -74,7 +74,7 @@
     </div>
 
     <script>
-        // JavaScript remains the same as in your original code
+        // JavaScript for the mini-app
         const historyList = document.getElementById("historyList");
         const body = document.body;
 
@@ -85,6 +85,15 @@
                 return;
             }
 
+            const googleMapsUrl = generateGoogleMapsUrl(query);
+
+            location.href = googleMapsUrl;
+
+            saveToHistory(query);
+            updateHistoryList();
+        }
+
+        function generateGoogleMapsUrl(query) {
             const isAddress = /\d+/.test(query);
             const isStreet = /\b(street|avenue|road|boulevard|drive|lane|carrer|calle)\b/i.test(query);
             const isMetro = /\b(station|metro|underground|subway)\b/i.test(query) || /Sagrera|Verdaguer|Diagonal|Passeig de Gràcia/i.test(query);
@@ -100,10 +109,7 @@
                 googleMapsUrl = `https://www.google.com/maps/search/${encodeURIComponent(query)}+near+me`;
             }
 
-            location.href = googleMapsUrl;
-
-            saveToHistory(query);
-            updateHistoryList();
+            return googleMapsUrl;
         }
 
         function saveToHistory(query) {
@@ -131,43 +137,10 @@
 
         function showExample() {
             const examples = [
-                "Restaurants",
-                "Carrer",
-                "flowers",
-                "places",
-                "Hotels",
-                "Gas",
-                "Electrical Chargers",
-                "Coffee",
-                "Parks",
-                "Art",
-                "Dessert",
-                "Museum",
-                "Electronics",
-                "Carrer de",
-                "Coffee shops",
-                "Plaza Catalunya",
-                "ATMs",
-                "Carrer",
-                "Pharmacies",
-                "Tapas",
-                "Sagrada Familia",
-                "Metro Sagrera",
-                "Shopping malls",
-                "Car wash",
-                "Carrer de",
-                "Plaza",
-                "Metro",
-                "Fast food",
-                "Gyms",
-                "Bookstores",
-                "Shopping malls",
-                "Cafe",
-                "Tabac shops",
-                "Metro",
-                "Hospitals",
-                "Clinics",
-                "Parking lots",
+                "Restaurants", "Carrer", "flowers", "places", "Hotels", "Gas", "Electrical Chargers", "Coffee",
+                "Parks", "Art", "Dessert", "Museum", "Electronics", "Carrer de", "Coffee shops", "Plaza Catalunya",
+                "ATMs", "Pharmacies", "Tapas", "Sagrada Familia", "Metro Sagrera", "Shopping malls", "Car wash",
+                "Gyms", "Bookstores", "Cafe", "Hospitals", "Clinics", "Parking lots"
             ];
             const randomExample = examples[Math.floor(Math.random() * examples.length)];
             document.getElementById("searchInput").value = randomExample;
@@ -178,6 +151,30 @@
         }
 
         updateHistoryList();
+
+        // Bot functionality
+        async function handleBotMessage(message) {
+            const query = message.text.trim();
+            if (!query) return "Please enter a location to search!";
+
+            const googleMapsUrl = generateGoogleMapsUrl(query);
+            saveToHistory(query);
+            updateHistoryList();
+
+            return `Here is your link: ${googleMapsUrl}`;
+        }
+
+        // Simulate bot message handling for demo purposes
+        async function simulateBotInteraction() {
+            const testMessages = ["Carrer de Llull", "Metro Sagrera", "Sagrada Familia"];
+            for (const msg of testMessages) {
+                const response = await handleBotMessage({ text: msg });
+                console.log(response);
+            }
+        }
+
+        // Run the simulation
+        simulateBotInteraction();
     </script>
 </body>
 </html>
