@@ -7,79 +7,99 @@
     <style>
         body {
             margin: 0;
-            font-family: 'Arial', sans-serif;
-            background: linear-gradient(135deg, #4e54c8, #8f94fb); /* Новый градиент */
+            font-family: 'Roboto', sans-serif;
+            background: linear-gradient(135deg, #000000, #1a1a1a); /* Чёрный футуристический фон */
             color: #ffffff;
             display: flex;
             justify-content: center;
-            align-items: flex-start;
+            align-items: center;
             min-height: 100vh;
-            padding-top: 80px; /* Высота осталась неизменной */
+            padding: 0;
         }
 
         .container {
             text-align: center;
-            background: rgba(255, 255, 255, 0.15); /* Увеличили прозрачность */
-            border-radius: 20px; /* Более мягкие формы */
-            padding: 25px; /* Чуть больше отступов */
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3); /* Улучшили тень */
+            background: rgba(30, 30, 30, 0.9);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 25px rgba(0, 255, 255, 0.2); /* Лёгкое сияние */
             max-width: 400px;
             width: 100%;
         }
 
         h1 {
-            font-size: 28px; /* Увеличили размер заголовка */
+            font-size: 28px;
             margin-bottom: 20px;
-            color: #ffe45c; /* Золотистый заголовок */
+            color: #00ffff; /* Насыщенный цвет для заголовка */
             animation: glow 2s infinite;
         }
 
         p {
-            font-size: 18px;
+            font-size: 16px;
             margin-bottom: 24px;
-            color: #ffffff;
+            color: #dcdcdc;
         }
 
         input[type="text"] {
             width: calc(100% - 20px);
             padding: 12px;
             margin-bottom: 20px;
-            border-radius: 10px; /* Более округлые края */
-            border: 1px solid #ffffff;
+            border-radius: 10px;
+            border: 1px solid #333333;
             outline: none;
             font-size: 16px;
-            background: rgba(255, 255, 255, 0.1); /* Легкий белый фон */
+            background: #1e1e1e;
             color: #ffffff;
         }
 
         input[type="text"]::placeholder {
-            color: #d1d5db; /* Светлый placeholder */
+            color: #6e6e6e;
         }
 
         button {
-            background: linear-gradient(90deg, #ff8a00, #e52e71); /* Градиент для кнопки */
+            background: linear-gradient(90deg, #0f2027, #203a43, #2c5364);
             color: #ffffff;
             border: none;
-            border-radius: 12px; /* Кнопка с округлыми краями */
+            border-radius: 12px;
             padding: 12px 20px;
             font-size: 16px;
             font-weight: bold;
             cursor: pointer;
-            box-shadow: 0 5px 10px rgba(255, 138, 0, 0.3); /* Тень под кнопкой */
             transition: transform 0.2s ease, box-shadow 0.2s ease;
         }
 
         button:hover {
-            transform: scale(1.05); /* Легкое увеличение кнопки при наведении */
-            box-shadow: 0 8px 15px rgba(255, 138, 0, 0.4); /* Более сильная тень */
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(0, 255, 255, 0.5); /* Сияние при наведении */
+        }
+
+        .interactive-text {
+            font-size: 14px;
+            margin-top: 10px;
+            color: #00ffff;
+            animation: pulse 2s infinite;
+            cursor: pointer;
+        }
+
+        .interactive-text:hover {
+            text-decoration: underline;
         }
 
         @keyframes glow {
             0%, 100% {
-                text-shadow: 0 0 10px #ffe45c, 0 0 20px #ffe45c, 0 0 30px #ffe45c;
+                text-shadow: 0 0 5px #00ffff, 0 0 10px #00ffff, 0 0 20px #00ffff;
             }
             50% {
-                text-shadow: 0 0 20px #fff700, 0 0 40px #fff700, 0 0 60px #fff700;
+                text-shadow: 0 0 10px #00ffff, 0 0 20px #00ffff, 0 0 40px #00ffff;
+            }
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 0.8;
+            }
+            50% {
+                opacity: 1;
             }
         }
     </style>
@@ -90,17 +110,30 @@
         <p>Enter an address or place to search:</p>
         <input type="text" id="searchInput" placeholder="Enter location...">
         <button onclick="search()">Search</button>
+        <div class="interactive-text" onclick="showExample()">Need ideas? Click here!</div>
     </div>
 
     <script>
         function search() {
             const query = document.getElementById('searchInput').value.trim();
             if (query) {
-                const googleMapsUrl = `https://www.google.com/maps/search/${encodeURIComponent(query)}`;
+                const googleMapsUrl = `https://www.google.com/maps/search/${encodeURIComponent(query)} near me`;
                 window.open(googleMapsUrl, '_blank');
             } else {
                 alert("Please enter a location to search!");
             }
+        }
+
+        function showExample() {
+            const examples = [
+                "Restaurants",
+                "Coffee shops",
+                "Gas stations",
+                "ATMs",
+                "Pharmacies"
+            ];
+            const randomExample = examples[Math.floor(Math.random() * examples.length)];
+            document.getElementById('searchInput').value = randomExample;
         }
     </script>
 </body>
