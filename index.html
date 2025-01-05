@@ -15,6 +15,7 @@
             align-items: flex-start;
             min-height: 100vh;
             padding-top: 80px;
+            transition: background-color 0.5s ease, color 0.5s ease;
         }
 
         .container {
@@ -25,6 +26,7 @@
             box-shadow: 0 10px 25px rgba(0, 255, 255, 0.2);
             max-width: 400px;
             width: 100%;
+            transition: background-color 0.5s ease, box-shadow 0.5s ease;
         }
 
         h1 {
@@ -75,7 +77,7 @@
             display: block;
         }
 
-        button {
+        button, .history-btn {
             background: linear-gradient(90deg, #0f2027, #203a43, #2c5364);
             color: #ffffff;
             border: none;
@@ -85,73 +87,91 @@
             font-weight: bold;
             cursor: pointer;
             transition: transform 0.2s ease, box-shadow 0.2s ease;
-            margin-top: 25px;
+            margin-top: 15px;
         }
 
-        button:hover {
+        button:hover, .history-btn:hover {
             transform: scale(1.05);
             box-shadow: 0 5px 15px rgba(0, 255, 255, 0.5);
         }
 
-        .history-btn, .share-btn {
-            margin-top: 15px;
-        }
-
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.8);
-            justify-content: center;
-            align-items: center;
-        }
-
-        .modal-content {
-            background: #fff;
-            color: #000;
-            padding: 20px;
-            border-radius: 8px;
-            width: 90%;
-            max-width: 400px;
-            text-align: left;
-        }
-
-        .modal-content h2 {
-            margin: 0 0 10px;
-        }
-
-        .close-modal {
-            background: red;
-            color: #fff;
-            padding: 5px 10px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-
-        .query-history {
-            background: rgba(0, 255, 255, 0.1);
-            border: 1px solid #00ffff;
-            border-radius: 8px;
-            padding: 10px;
-            max-height: 200px;
-            overflow-y: auto;
-            margin-top: 10px;
-            text-align: left;
+        .interactive-text {
             font-size: 14px;
-        }
-
-        .query-history div {
-            cursor: pointer;
+            margin-top: 20px;
             color: #00ffff;
-            margin: 5px 0;
+            animation: pulse 2s infinite;
+            cursor: pointer;
         }
 
-        .query-history div:hover {
+        .interactive-text:hover {
             text-decoration: underline;
+        }
+
+        .share-btn {
+            background: #28a745;
+            margin-top: 10px;
+        }
+
+        .help-btn {
+            background: #dc3545;
+            margin-top: 10px;
+            position: relative;
+            padding: 14px;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            text-align: center;
+            font-size: 24px;
+            font-weight: bold;
+            line-height: 22px;
+            cursor: pointer;
+        }
+
+        .help-modal {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.9);
+            color: #ffffff;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            text-align: left;
+            width: 80%;
+            max-width: 500px;
+            display: none;
+        }
+
+        .history-list {
+            margin-top: 20px;
+            text-align: left;
+            max-height: 150px;
+            overflow-y: auto;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 10px;
+            border-radius: 8px;
+            color: #fff;
+            display: none;
+        }
+
+        @keyframes glow {
+            0%, 100% {
+                text-shadow: 0 0 5px #00ffff, 0 0 10px #00ffff, 0 0 20px #00ffff;
+            }
+            50% {
+                text-shadow: 0 0 10px #00ffff, 0 0 20px #00ffff, 0 0 40px #00ffff;
+            }
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 0.8;
+            }
+            50% {
+                opacity: 1;
+            }
         }
     </style>
 </head>
@@ -166,25 +186,62 @@
         <button onclick="search()">Search</button>
         <button class="share-btn" onclick="shareAddress()">Share Address</button>
         <button class="history-btn" onclick="showHistory()">History</button>
-        <div class="query-history" id="queryHistory"></div>
-        <button style="background: red;" onclick="showModal()">?</button>
-    </div>
-
-    <div class="modal" id="helpModal">
-        <div class="modal-content">
-            <h2>How to Use:</h2>
+        <div class="help-btn" onclick="toggleHelp()">?</div>
+        <div class="help-modal" id="helpModal">
+            <h3>Help & Tips</h3>
+            <p>Examples of queries:</p>
             <ul>
-                <li>Enter a street, address, or place in the input box.</li>
-                <li>Click "Search" to find the location on Google Maps.</li>
-                <li>Use "Share Address" to copy the generated link.</li>
-                <li>Click on the "History" button to access past queries.</li>
+                <li>Enter a street name (e.g., "Carrer de Llull")</li>
+                <li>Looking for metro? Type "metro"</li>
+                <li>Searching for a place? Type its name (e.g., "Sagrada Familia")</li>
+                <li>Enter an address for navigation (e.g., "Carrer de Llull 203")</li>
             </ul>
-            <button class="close-modal" onclick="hideModal()">Close</button>
+            <button onclick="toggleHelp()">Close</button>
         </div>
+        <div class="history-list" id="historyList"></div>
     </div>
 
     <script>
-        const historyLimit = 50;
+        function randomizeColors() {
+            const randomColor = () => '#' + Math.floor(Math.random() * 16777215).toString(16);
+            document.body.style.backgroundColor = randomColor();
+            document.querySelector('.container').style.backgroundColor = randomColor();
+            document.querySelector('.container').style.boxShadow = `0 10px 25px ${randomColor()}`;
+        }
+
+        function shareAddress() {
+            const query = document.getElementById('searchInput').value.trim();
+            if (!query) {
+                alert("No address to share!");
+                return;
+            }
+            const googleMapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`;
+            navigator.clipboard.writeText(googleMapsUrl).then(() => {
+                alert("Address copied to clipboard!");
+            });
+        }
+
+        function toggleHelp() {
+            const modal = document.getElementById('helpModal');
+            modal.style.display = modal.style.display === 'block' ? 'none' : 'block';
+        }
+
+        function showHistory() {
+            const historyList = JSON.parse(localStorage.getItem('history') || '[]');
+            const historyContainer = document.getElementById('historyList');
+            if (historyList.length === 0) {
+                alert("No history available!");
+                return;
+            }
+            historyContainer.innerHTML = historyList
+                .map((item) => `<div onclick="insertToInput('${item}')">${item}</div>`)
+                .join('');
+            historyContainer.style.display = 'block';
+        }
+
+        function insertToInput(value) {
+            document.getElementById('searchInput').value = value;
+        }
 
         function search() {
             const query = document.getElementById('searchInput').value.trim();
@@ -192,59 +249,13 @@
                 alert("Please enter a location to search!");
                 return;
             }
-
-            saveToHistory(query);
-            const googleMapsUrl = `https://www.google.com/maps/search/${encodeURIComponent(query)}`;
-            window.open(googleMapsUrl, '_blank');
-        }
-
-        function randomizeColors() {
-            const colors = ['#ff7f50', '#6495ed', '#ff6347', '#4682b4', '#40e0d0'];
-            const randomColor = colors[Math.floor(Math.random() * colors.length)];
-            document.body.style.background = randomColor;
-        }
-
-        function clearInput() {
-            document.getElementById('searchInput').value = '';
-        }
-
-        function shareAddress() {
-            const query = document.getElementById('searchInput').value.trim();
-            if (!query) {
-                alert("Please enter a location first!");
-                return;
-            }
-            const link = `https://www.google.com/maps/search/${encodeURIComponent(query)}`;
-            navigator.clipboard.writeText(link).then(() => {
-                alert("Address copied to clipboard!");
-            });
-        }
-
-        function saveToHistory(query) {
-            const history = JSON.parse(localStorage.getItem('queryHistory')) || [];
+            const history = JSON.parse(localStorage.getItem('history') || '[]');
             if (!history.includes(query)) {
-                history.unshift(query);
-                if (history.length > historyLimit) history.pop();
-                localStorage.setItem('queryHistory', JSON.stringify(history));
+                if (history.length >= 50) history.shift();
+                history.push(query);
+                localStorage.setItem('history', JSON.stringify(history));
             }
-        }
-
-        function showHistory() {
-            const history = JSON.parse(localStorage.getItem('queryHistory')) || [];
-            const historyDiv = document.getElementById('queryHistory');
-            historyDiv.innerHTML = history.map(q => `<div onclick="setSearch('${q}')">${q}</div>`).join('');
-        }
-
-        function setSearch(query) {
-            document.getElementById('searchInput').value = query;
-        }
-
-        function showModal() {
-            document.getElementById('helpModal').style.display = 'flex';
-        }
-
-        function hideModal() {
-            document.getElementById('helpModal').style.display = 'none';
+            alert("Make your next choice from advanced Dialog");
         }
     </script>
 </body>
