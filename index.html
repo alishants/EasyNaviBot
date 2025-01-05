@@ -30,7 +30,14 @@
             </div>
         </div>
 
-        <div id="weatherInfo" style="margin-top: 20px;"></div>
+        <!-- Weather Info -->
+        <div id="weatherInfo" class="mb-6 bg-gray-700 p-4 rounded-lg text-gray-300"></div>
+        <button
+            class="w-full bg-cyan-500 text-gray-900 font-bold py-3 rounded-lg hover:bg-cyan-600 transition mb-4"
+            onclick="getWeather()"
+        >
+            Update Weather
+        </button>
 
         <!-- Buttons -->
         <div class="space-y-4">
@@ -179,31 +186,30 @@
             document.getElementById("searchInput").value = '';
         }
 
-function getWeather() {
-    if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(async (position) => {
-            const { latitude, longitude } = position.coords;
-            const apiKey = "your_openweather_api_key"; // Замените на ваш API ключ
-            const url = `https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&units=metric&appid=${apiKey}`;
-            const response = await fetch(url);
-            const data = await response.json();
+        function getWeather() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(async (position) => {
+                    const { latitude, longitude } = position.coords;
+                    const apiKey = "your_openweather_api_key"; // Замените на ваш API ключ
+                    const url = `https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&units=metric&appid=${apiKey}`;
+                    const response = await fetch(url);
+                    const data = await response.json();
 
-            const weatherInfo = `
-                <h3>Weather Information</h3>
-                <p><strong>Location:</strong> ${data.name}</p>
-                <p><strong>Temperature:</strong> ${data.main.temp}°C</p>
-                <p><strong>Condition:</strong> ${data.weather[0].description}</p>
-            `;
-            document.getElementById("weatherInfo").innerHTML = weatherInfo;
-        });
-    } else {
-        alert("Geolocation is not supported by your browser.");
-    }
-}
+                    const weatherInfo = `
+                        <h3 class="text-lg font-semibold text-cyan-400 mb-2">Weather Information</h3>
+                        <p><strong>Location:</strong> ${data.name}</p>
+                        <p><strong>Temperature:</strong> ${data.main.temp}°C</p>
+                        <p><strong>Condition:</strong> ${data.weather[0].description}</p>
+                    `;
+                    document.getElementById("weatherInfo").innerHTML = weatherInfo;
+                });
+            } else {
+                alert("Geolocation is not supported by your browser.");
+            }
+        }
 
-// Вызовите функцию при загрузке страницы
-getWeather();
-
+        // Call getWeather on page load
+        getWeather();
 
         updateHistoryList();
     </script>
