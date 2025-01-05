@@ -114,6 +114,34 @@
             text-decoration: underline;
         }
 
+        .modal {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 90%;
+            max-width: 400px;
+            background: var(--container-bg);
+            color: var(--text-color);
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px var(--shadow-color);
+            display: none;
+            z-index: 1000;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .modal.active {
+            display: block;
+        }
+
+        .close-modal {
+            text-align: right;
+            font-size: 18px;
+            cursor: pointer;
+            margin-bottom: 10px;
+        }
+
         ul.history-list {
             list-style: none;
             padding: 0;
@@ -131,18 +159,6 @@
         ul.history-list li:hover {
             background-color: var(--history-hover-bg);
         }
-
-        #resultContainer {
-            margin-top: 20px;
-            display: none;
-        }
-
-        iframe {
-            width: 100%;
-            height: 300px;
-            border: 0;
-            border-radius: 10px;
-        }
     </style>
 </head>
 <body>
@@ -156,87 +172,116 @@
         <div class="interactive-text" onclick="showExample()">Need ideas? Click here!</div>
         <h3>Search History</h3>
         <ul class="history-list" id="historyList"></ul>
+    </div>
 
-        <div id="resultContainer">
-            <iframe id="mapResult"></iframe>
-        </div>
+    <div class="modal" id="helpModal">
+        <div class="close-modal" onclick="toggleHelpModal()">✖</div>
+        <h2>Search Help</h2>
+        <p><strong>Examples:</strong></p>
+        <p>Street: <i>Carrer de Llull</i></p>
+        <p>Address: <i>Carrer de Llull 203</i></p>
+        <p>Metro: <i>Metro Diagonal</i></p>
+        <p>Place: <i>Sagrada Familia</i></p>
+        <p>Shop: <i>Tabacs or MacDonalds</i></p>
     </div>
 
     <script>
         const historyList = document.getElementById("historyList");
         const body = document.body;
 
-function search() {
-    const query = document.getElementById("searchInput").value.trim();
-    if (!query) {
-        alert("Please enter a location to search!");
-        return;
-    }
+        function search() {
+            const query = document.getElementById("searchInput").value.trim();
+            if (!query) {
+                alert("Please enter a location to search!");
+                return;
+            }
 
-    const isAddress = /\d+/.test(query); // Проверка, это ли конкретный адрес
-    const isStreet = /\b(street|avenue|road|boulevard|drive|lane|carrer|calle)\b/i.test(query);
-    const isMetro = /\b(station|metro|underground|subway)\b/i.test(query) || /Sagrera|Verdaguer|Diagonal|Passeig de Gràcia/i.test(query);
-    const isPlace = /\b(plaza|square|park|area)\b/i.test(query);
+            const isAddress = /\d+/.test(query);
+            const isStreet = /\b(street|avenue|road|boulevard|drive|lane|carrer|calle)\b/i.test(query);
+            const isMetro = /\b(station|metro|underground|subway)\b/i.test(query) || /Sagrera|Verdaguer|Diagonal|Passeig de Gràcia/i.test(query);
+            const isPlace = /\b(plaza|square|park|area)\b/i.test(query);
 
-    // Определяем функцию для работы с геолокацией
-    function useCurrentLocation(callback) {
-        if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(
-                (position) => {
-                    const { latitude, longitude } = position.coords;
-                    callback(latitude, longitude);
-                },
-                (error) => {
-                    alert("Unable to retrieve your location. Please allow location access or enter a location manually.");
-                    callback(null, null);
-                }
-            );
-        } else {
-            alert("Geolocation is not supported by your browser.");
-            callback(null, null);
-        }
-    }
+            let googleMapsUrl;
 
-    // Получаем URL для Google Maps
-    function generateGoogleMapsUrl(origin, query) {
-        if (isAddress || isMetro) {
-            return `https://www.google.com/maps/embed/v1/directions?key=AIzaSyBATkE39afAqUS7riPFCyKsmpkPTwdPpDI&origin=${encodeURIComponent(origin)}&destination=${encodeURIComponent(query)}`;
-        } else if (isStreet || isPlace) {
-            return `https://www.google.com/maps/embed/v1/search?key=AIzaSyBATkE39afAqUS7riPFCyKsmpkPTwdPpDI&q=${encodeURIComponent(query)}`;
-        } else {
-            return `https://www.google.com/maps/embed/v1/search?key=AIzaSyBATkE39afAqUS7riPFCyKsmpkPTwdPpDI&q=${encodeURIComponent(query)}+near+me`;
-        }
-    }
+            if (isAddress || isMetro) {
+                googleMapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(query)}`;
+            } else if (isStreet || isPlace) {
+                googleMapsUrl = `https://www.google.com/maps/search/${encodeURIComponent(query)}`;
+            } else {
+                googleMapsUrl = `https://www.google.com/maps/search/${encodeURIComponent(query)}+near+me`;
+            }
 
-    // Если нужно конкретное направление, определяем текущую геолокацию
-    if (isAddress || isMetro) {
-        useCurrentLocation((latitude, longitude) => {
-            const origin = latitude && longitude ? `${latitude},${longitude}` : "Barcelona"; // Укажите "Barcelona" как fallback
-            const googleMapsUrl = generateGoogleMapsUrl(origin, query);
-
-            // Отображаем результат внутри iframe
-            const resultContainer = document.getElementById("resultContainer");
-            const mapResult = document.getElementById("mapResult");
-
-            mapResult.src = googleMapsUrl;
-            resultContainer.style.display = "block";
-
+            window.open(googleMapsUrl, "_blank");
             saveToHistory(query);
             updateHistoryList();
-        });
-    } else {
-        const googleMapsUrl = generateGoogleMapsUrl("Barcelona", query); // Fallback origin
-        const resultContainer = document.getElementById("resultContainer");
-        const mapResult = document.getElementById("mapResult");
+        }
 
-        mapResult.src = googleMapsUrl;
-        resultContainer.style.display = "block";
+        function saveToHistory(query) {
+            const history = JSON.parse(localStorage.getItem("searchHistory") || "[]");
+            if (!history.includes(query)) {
+                history.unshift(query);
+                if (history.length > 10) history.pop();
+                localStorage.setItem("searchHistory", JSON.stringify(history));
+            }
+        }
 
-        saveToHistory(query);
+        function updateHistoryList() {
+            const history = JSON.parse(localStorage.getItem("searchHistory") || "[]");
+            historyList.innerHTML = history.map(item => `<li onclick="setSearch('${item}')">${item}</li>`).join("");
+        }
+
+        function setSearch(value) {
+            document.getElementById("searchInput").value = value;
+        }
+
+        function toggleHelpModal() {
+            const helpModal = document.getElementById("helpModal");
+            helpModal.classList.toggle("active");
+        }
+
+        function toggleTheme() {
+            if (body.dataset.theme === "light") {
+                body.dataset.theme = "dark";
+            } else {
+                body.dataset.theme = "light";
+            }
+        }
+
+        function showExample() {
+            const examples = [
+                "Restaurants",
+                "Carrer",
+                "Carrer de",
+                "Coffee shops",
+                "Plaza Catalunya",
+                "ATMs",
+                "Carrer",
+                "Pharmacies",
+                "Tapas",
+                "Sagrada Familia",
+                "Metro Sagrera",
+                "Shopping malls",
+                "Carrer de",
+                "Plaza",
+                "Metro",
+                "Fast food",
+                "Gyms",
+                "Bookstores",
+                "Shopping malls",
+                "Cafe",
+                "Tabac shops",
+                "Metro",
+                "Hospitals",
+                "Clinics",
+                "Parking lots",
+            ];
+            const randomExample = examples[Math.floor(Math.random() * examples.length)];
+            document.getElementById("searchInput").value = randomExample;
+        }
+
+        // Initialize history on page load
         updateHistoryList();
-    }
-}
-
+        // Set default theme to dark
         body.dataset.theme = "dark";
     </script>
 </body>
