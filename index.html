@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Навигационный бот</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 20px;
+        }
+        input {
+            padding: 10px;
+            font-size: 16px;
+            margin-bottom: 20px;
+            width: 80%;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #0088cc;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        button:hover {
+            background-color: #005f99;
+        }
+    </style>
+</head>
+<body>
+    <h1>Навигационный бот</h1>
+    <p>Введите адрес или запрос для поиска:</p>
+    <input type="text" id="query" placeholder="Например: McDonald's или Tabac" />
+    <button id="search-button">Искать</button>
+    <div id="result" style="margin-top: 20px;"></div>
+
+    <script>
+        // Telegram Web App API
+        const tg = window.Telegram.WebApp;
+
+        // Запуск мини-приложения
+        tg.ready();
+
+        // Обработчик кнопки
+        const searchButton = document.getElementById("search-button");
+        searchButton.addEventListener("click", () => {
+            const query = document.getElementById("query").value;
+            if (!query) {
+                document.getElementById("result").innerHTML = "Введите запрос!";
+                return;
+            }
+
+            // Показываем пользователю ссылку для поиска
+            const mapsUrl = `https://www.google.com/maps/search/${encodeURIComponent(query)}`;
+            document.getElementById("result").innerHTML = `
+                <p>Результаты поиска:</p>
+                <a href="${mapsUrl}" target="_blank">Посмотреть на Google Maps</a>
+            `;
+        });
+    </script>
+</body>
+</html>
