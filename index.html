@@ -5,17 +5,37 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Navigation Mini App</title>
     <style>
+        :root {
+            --bg-color: #1a1a1a;
+            --text-color: #ffffff;
+            --button-bg: linear-gradient(90deg, #0f2027, #203a43, #2c5364);
+            --header-color: #00ffff;
+            --modal-bg: #ffffff;
+            --modal-text: #333333;
+            --placeholder-color: #6e6e6e;
+        }
+
+        body.light-mode {
+            --bg-color: #ffffff;
+            --text-color: #333333;
+            --button-bg: linear-gradient(90deg, #ffffff, #dcdcdc, #a5a5a5);
+            --header-color: #005f5f;
+            --modal-bg: #1a1a1a;
+            --modal-text: #ffffff;
+            --placeholder-color: #999999;
+        }
+
         body {
             margin: 0;
             font-family: 'Roboto', sans-serif;
-            background: linear-gradient(135deg, #000000, #1a1a1a);
-            color: #ffffff;
+            background: var(--bg-color);
+            color: var(--text-color);
             display: flex;
             justify-content: center;
             align-items: flex-start;
             min-height: 100vh;
             padding-top: 80px;
-            transition: background-color 0.5s ease, color 0.5s ease;
+            transition: all 0.3s ease;
         }
 
         .container {
@@ -26,21 +46,28 @@
             box-shadow: 0 10px 25px rgba(0, 255, 255, 0.2);
             max-width: 400px;
             width: 100%;
-            transition: background-color 0.5s ease, box-shadow 0.5s ease;
+            transition: all 0.3s ease;
         }
 
         h1 {
             font-size: 28px;
             margin-bottom: 20px;
-            color: #00ffff;
-            animation: glow 2s infinite;
+            color: var(--header-color);
+            cursor: pointer;
+        }
+
+        .help-icon {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-size: 24px;
+            color: red;
             cursor: pointer;
         }
 
         p {
             font-size: 16px;
             margin-bottom: 24px;
-            color: #dcdcdc;
         }
 
         .input-wrapper {
@@ -54,193 +81,100 @@
             border: 1px solid #333333;
             outline: none;
             font-size: 18px;
-            background: #1e1e1e;
-            color: #ffffff;
+            background: var(--bg-color);
+            color: var(--text-color);
         }
 
         input[type="text"]::placeholder {
-            color: #6e6e6e;
+            color: var(--placeholder-color);
         }
 
-        .clear-icon {
-            position: absolute;
-            right: 10px;
-            top: 50%;
-            transform: translateY(-50%);
-            font-size: 16px;
-            color: #ffffff;
-            cursor: pointer;
-            display: none;
-        }
-
-        input[type="text"]:not(:placeholder-shown) + .clear-icon {
-            display: block;
-        }
-
-        button, .history-btn {
-            background: linear-gradient(90deg, #0f2027, #203a43, #2c5364);
-            color: #ffffff;
+        button {
+            background: var(--button-bg);
+            color: var(--text-color);
             border: none;
             border-radius: 12px;
             padding: 14px 25px;
             font-size: 18px;
             font-weight: bold;
             cursor: pointer;
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
             margin-top: 15px;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
         }
 
-        button:hover, .history-btn:hover {
+        button:hover {
             transform: scale(1.05);
             box-shadow: 0 5px 15px rgba(0, 255, 255, 0.5);
         }
 
-        .interactive-text {
-            font-size: 14px;
-            margin-top: 20px;
-            color: #00ffff;
-            animation: pulse 2s infinite;
-            cursor: pointer;
-        }
-
-        .interactive-text:hover {
-            text-decoration: underline;
-        }
-
-        .share-btn {
-            background: #28a745;
-            margin-top: 10px;
-        }
-
-        .help-btn {
-            background: #dc3545;
-            margin-top: 10px;
-            position: relative;
-            padding: 14px;
-            border-radius: 50%;
-            width: 50px;
-            height: 50px;
-            text-align: center;
-            font-size: 24px;
-            font-weight: bold;
-            line-height: 22px;
-            cursor: pointer;
-        }
-
-        .help-modal {
+        .modal {
             position: fixed;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            background: rgba(0, 0, 0, 0.9);
-            color: #ffffff;
-            border-radius: 12px;
+            background: var(--modal-bg);
+            color: var(--modal-text);
             padding: 20px;
-            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.5);
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+            display: none;
             z-index: 1000;
-            text-align: left;
-            width: 80%;
-            max-width: 500px;
-            display: none;
+            text-align: center;
+            max-width: 300px;
         }
 
-        .history-list {
+        .modal.visible {
+            display: block;
+        }
+
+        .history {
             margin-top: 20px;
-            text-align: left;
-            max-height: 150px;
-            overflow-y: auto;
-            background: rgba(0, 0, 0, 0.7);
-            padding: 10px;
-            border-radius: 8px;
-            color: #fff;
-            display: none;
         }
 
-        @keyframes glow {
-            0%, 100% {
-                text-shadow: 0 0 5px #00ffff, 0 0 10px #00ffff, 0 0 20px #00ffff;
-            }
-            50% {
-                text-shadow: 0 0 10px #00ffff, 0 0 20px #00ffff, 0 0 40px #00ffff;
-            }
+        .history-item {
+            cursor: pointer;
+            color: var(--header-color);
+            text-decoration: underline;
         }
 
-        @keyframes pulse {
-            0%, 100% {
-                opacity: 0.8;
-            }
-            50% {
-                opacity: 1;
-            }
+        .history-item:hover {
+            text-decoration: none;
         }
     </style>
 </head>
 <body>
+    <div class="help-icon" onclick="toggleModal()">?</div>
     <div class="container">
-        <h1 onclick="randomizeColors()">Navigation Mini App</h1>
+        <h1 onclick="toggleTheme()">Navigation Mini App</h1>
         <p>Enter an address, street, or place to search:</p>
         <div class="input-wrapper">
             <input type="text" id="searchInput" placeholder="Enter location...">
-            <span class="clear-icon" onclick="clearInput()">✖</span>
         </div>
         <button onclick="search()">Search</button>
-        <button class="share-btn" onclick="shareAddress()">Share Address</button>
-        <button class="history-btn" onclick="showHistory()">History</button>
-        <div class="help-btn" onclick="toggleHelp()">?</div>
-        <div class="help-modal" id="helpModal">
-            <h3>Help & Tips</h3>
-            <p>Examples of queries:</p>
-            <ul>
-                <li>Enter a street name (e.g., "Carrer de Llull")</li>
-                <li>Looking for metro? Type "metro"</li>
-                <li>Searching for a place? Type its name (e.g., "Sagrada Familia")</li>
-                <li>Enter an address for navigation (e.g., "Carrer de Llull 203")</li>
-            </ul>
-            <button onclick="toggleHelp()">Close</button>
-        </div>
-        <div class="history-list" id="historyList"></div>
+        <button onclick="shareAddress()">Share Address</button>
+        <button onclick="showHistory()">View History</button>
+        <div class="history"></div>
+    </div>
+
+    <div class="modal" id="helpModal">
+        <p>Enter a street, address, or place to search:</p>
+        <ul>
+            <li>Street: "Carrer de Llull"</li>
+            <li>Place: "Sagrada Familia"</li>
+            <li>Metro: "Metro Sagrera"</li>
+        </ul>
+        <button onclick="toggleModal()">Close</button>
     </div>
 
     <script>
-        function randomizeColors() {
-            const randomColor = () => '#' + Math.floor(Math.random() * 16777215).toString(16);
-            document.body.style.backgroundColor = randomColor();
-            document.querySelector('.container').style.backgroundColor = randomColor();
-            document.querySelector('.container').style.boxShadow = `0 10px 25px ${randomColor()}`;
+        let history = JSON.parse(localStorage.getItem('searchHistory')) || [];
+
+        function toggleTheme() {
+            document.body.classList.toggle('light-mode');
         }
 
-        function shareAddress() {
-            const query = document.getElementById('searchInput').value.trim();
-            if (!query) {
-                alert("No address to share!");
-                return;
-            }
-            const googleMapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`;
-            navigator.clipboard.writeText(googleMapsUrl).then(() => {
-                alert("Address copied to clipboard!");
-            });
-        }
-
-        function toggleHelp() {
-            const modal = document.getElementById('helpModal');
-            modal.style.display = modal.style.display === 'block' ? 'none' : 'block';
-        }
-
-        function showHistory() {
-            const historyList = JSON.parse(localStorage.getItem('history') || '[]');
-            const historyContainer = document.getElementById('historyList');
-            if (historyList.length === 0) {
-                alert("No history available!");
-                return;
-            }
-            historyContainer.innerHTML = historyList
-                .map((item) => `<div onclick="insertToInput('${item}')">${item}</div>`)
-                .join('');
-            historyContainer.style.display = 'block';
-        }
-
-        function insertToInput(value) {
-            document.getElementById('searchInput').value = value;
+        function toggleModal() {
+            document.getElementById('helpModal').classList.toggle('visible');
         }
 
         function search() {
@@ -249,13 +183,36 @@
                 alert("Please enter a location to search!");
                 return;
             }
-            const history = JSON.parse(localStorage.getItem('history') || '[]');
-            if (!history.includes(query)) {
-                if (history.length >= 50) history.shift();
-                history.push(query);
-                localStorage.setItem('history', JSON.stringify(history));
+
+            history.unshift(query);
+            if (history.length > 50) history.pop();
+            localStorage.setItem('searchHistory', JSON.stringify(history));
+
+            alert("Search initiated: " + query);
+        }
+
+        function shareAddress() {
+            const query = document.getElementById('searchInput').value.trim();
+            if (!query) {
+                alert("No address to share!");
+                return;
             }
-            alert("Make your next choice from advanced Dialog");
+
+            navigator.clipboard.writeText(query).then(() => {
+                alert("Address copied!");
+            });
+        }
+
+        function showHistory() {
+            const historyContainer = document.querySelector('.history');
+            historyContainer.innerHTML = '';
+            history.forEach((item, index) => {
+                const div = document.createElement('div');
+                div.textContent = item;
+                div.className = 'history-item';
+                div.onclick = () => (document.getElementById('searchInput').value = item);
+                historyContainer.appendChild(div);
+            });
         }
     </script>
 </body>
