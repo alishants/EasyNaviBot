@@ -182,6 +182,7 @@
         <p>Address: <i>Carrer de Llull 203</i></p>
         <p>Metro: <i>Metro Diagonal</i></p>
         <p>Place: <i>Sagrada Familia</i></p>
+        <p>Shop: <i>Tabacs or MacDonalds</i></p>
     </div>
 
     <script>
@@ -249,22 +250,30 @@
         function showExample() {
             const examples = [
                 "Restaurants",
-                "Carrer de Llull",
+                "Carrer",
+                "Carrer de",
                 "Coffee shops",
                 "Plaza Catalunya",
                 "ATMs",
+                "Carrer",
                 "Pharmacies",
+                "Tapas",
                 "Sagrada Familia",
                 "Metro Sagrera",
                 "Shopping malls",
-                "Carrer de Balmes",
+                "Carrer de",
+                "Plaza",
+                "Metro",
                 "Fast food",
                 "Gyms",
                 "Bookstores",
+                "Shopping malls",
+                "Cafe",
                 "Tabac shops",
+                "Metro",
                 "Hospitals",
+                "Clinics",
                 "Parking lots",
-                "Public transport"
             ];
             const randomExample = examples[Math.floor(Math.random() * examples.length)];
             document.getElementById("searchInput").value = randomExample;
