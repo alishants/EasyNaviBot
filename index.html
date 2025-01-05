@@ -34,7 +34,7 @@
         <div id="weatherInfo" class="mb-6 bg-gray-700 p-4 rounded-lg text-gray-300"></div>
         <button
             class="w-full bg-cyan-500 text-gray-900 font-bold py-3 rounded-lg hover:bg-cyan-600 transition mb-4"
-            onclick="getWeather()"
+            onclick="openWeatherApp()"
         >
             Update Weather
         </button>
@@ -83,59 +83,23 @@
     </div>
 
     <script>
-        // JavaScript remains the same as in your original code
         const historyList = document.getElementById("historyList");
         const body = document.body;
 
- function search() {
-    const query = document.getElementById("searchInput").value.trim();
-    if (!query) {
-        alert("Please enter a location to search!");
-        return;
-    }
-
-    // Check if the user is on Android and redirect to Google Maps app
-    if (/Android/i.test(navigator.userAgent)) {
-        location.href = `geo:0,0?q=${encodeURIComponent(query)}`;
-        return;
-    }
-
-    const isAddress = /\d+/.test(query);
-    const isStreet = /\b(street|avenue|road|boulevard|drive|lane|carrer|calle)\b/i.test(query);
-    const isMetro = /\b(station|metro|underground|subway)\b/i.test(query) || /Sagrera|Verdaguer|Diagonal|Passeig de Gràcia/i.test(query);
-    const isPlace = /\b(plaza|square|park|area)\b/i.test(query);
-
-    let googleMapsUrl;
-
-    if (isAddress || isMetro) {
-        googleMapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(query)}`;
-    } else if (isStreet || isPlace) {
-        googleMapsUrl = `https://www.google.com/maps/search/${encodeURIComponent(query)}`;
-    } else {
-        googleMapsUrl = `https://www.google.com/maps/search/${encodeURIComponent(query)}+near+me`;
-    }
-
-    location.href = googleMapsUrl;
-
-    saveToHistory(query);
-    updateHistoryList();
-}
-
-            const isAddress = /\d+/.test(query);
-            const isStreet = /\b(street|avenue|road|boulevard|drive|lane|carrer|calle)\b/i.test(query);
-            const isMetro = /\b(station|metro|underground|subway)\b/i.test(query) || /Sagrera|Verdaguer|Diagonal|Passeig de Gràcia/i.test(query);
-            const isPlace = /\b(plaza|square|park|area)\b/i.test(query);
-
-            let googleMapsUrl;
-
-            if (isAddress || isMetro) {
-                googleMapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(query)}`;
-            } else if (isStreet || isPlace) {
-                googleMapsUrl = `https://www.google.com/maps/search/${encodeURIComponent(query)}`;
-            } else {
-                googleMapsUrl = `https://www.google.com/maps/search/${encodeURIComponent(query)}+near+me`;
+        function search() {
+            const query = document.getElementById("searchInput").value.trim();
+            if (!query) {
+                alert("Please enter a location to search!");
+                return;
             }
 
+            // Check if the user is on Android and redirect to Google Maps app
+            if (/Android/i.test(navigator.userAgent)) {
+                location.href = `geo:0,0?q=${encodeURIComponent(query)}`;
+                return;
+            }
+
+            let googleMapsUrl = `https://www.google.com/maps/search/${encodeURIComponent(query)}`;
             location.href = googleMapsUrl;
 
             saveToHistory(query);
@@ -209,34 +173,20 @@
             document.getElementById("searchInput").value = randomExample;
         }
 
+
         function clearInput() {
             document.getElementById("searchInput").value = '';
         }
 
-        function getWeather() {
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(async (position) => {
-                    const { latitude, longitude } = position.coords;
-                    const apiKey = "your_openweather_api_key"; // Замените на ваш API ключ
-                    const url = `https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&units=metric&appid=${apiKey}`;
-                    const response = await fetch(url);
-                    const data = await response.json();
-
-                    const weatherInfo = `
-                        <h3 class="text-lg font-semibold text-cyan-400 mb-2">Weather Information</h3>
-                        <p><strong>Location:</strong> ${data.name}</p>
-                        <p><strong>Temperature:</strong> ${data.main.temp}°C</p>
-                        <p><strong>Condition:</strong> ${data.weather[0].description}</p>
-                    `;
-                    document.getElementById("weatherInfo").innerHTML = weatherInfo;
-                });
+        // Open weather app or URL
+        function openWeatherApp() {
+            if (/Android/i.test(navigator.userAgent)) {
+                // Open Android weather app
+                location.href = "https://www.google.com/search?q=weather";
             } else {
-                alert("Geolocation is not supported by your browser.");
+                alert("Weather app redirection is only supported on Android.");
             }
         }
-
-        // Call getWeather on page load
-        getWeather();
 
         updateHistoryList();
     </script>
