@@ -74,7 +74,9 @@
     </div>
 
     <script>
+        // JavaScript remains the same as in your original code
         const historyList = document.getElementById("historyList");
+        const body = document.body;
 
         function search() {
             const query = document.getElementById("searchInput").value.trim();
@@ -83,15 +85,19 @@
                 return;
             }
 
-            const isAndroid = /Android/i.test(navigator.userAgent);
+            const isAddress = /\d+/.test(query);
+            const isStreet = /\b(street|avenue|road|boulevard|drive|lane|carrer|calle)\b/i.test(query);
+            const isMetro = /\b(station|metro|underground|subway)\b/i.test(query) || /Sagrera|Verdaguer|Diagonal|Passeig de Gràcia/i.test(query);
+            const isPlace = /\b(plaza|square|park|area)\b/i.test(query);
+
             let googleMapsUrl;
 
-            if (isAndroid) {
-                // Use Google Maps link for Android
-                googleMapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`;
-            } else {
-                // Use generic URL for other platforms
+            if (isAddress || isMetro) {
+                googleMapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(query)}`;
+            } else if (isStreet || isPlace) {
                 googleMapsUrl = `https://www.google.com/maps/search/${encodeURIComponent(query)}`;
+            } else {
+                googleMapsUrl = `https://www.google.com/maps/search/${encodeURIComponent(query)}+near+me`;
             }
 
             location.href = googleMapsUrl;
@@ -124,7 +130,45 @@
         }
 
         function showExample() {
-            const examples = ["Restaurants", "Carrer", "Hotels", "Parks", "Plaza Catalunya", "Sagrada Familia", "Metro"];
+            const examples = [
+                "Restaurants",
+                "Carrer",
+                "flowers",
+                "places",
+                "Hotels",
+                "Gas",
+                "Electrical Chargers",
+                "Coffee",
+                "Parks",
+                "Art",
+                "Dessert",
+                "Museum",
+                "Electronics",
+                "Carrer de",
+                "Coffee shops",
+                "Plaza Catalunya",
+                "ATMs",
+                "Carrer",
+                "Pharmacies",
+                "Tapas",
+                "Sagrada Familia",
+                "Metro Sagrera",
+                "Shopping malls",
+                "Car wash",
+                "Carrer de",
+                "Plaza",
+                "Metro",
+                "Fast food",
+                "Gyms",
+                "Bookstores",
+                "Shopping malls",
+                "Cafe",
+                "Tabac shops",
+                "Metro",
+                "Hospitals",
+                "Clinics",
+                "Parking lots",
+            ];
             const randomExample = examples[Math.floor(Math.random() * examples.length)];
             document.getElementById("searchInput").value = randomExample;
         }
