@@ -114,34 +114,6 @@
             text-decoration: underline;
         }
 
-        .modal {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 90%;
-            max-width: 400px;
-            background: var(--container-bg);
-            color: var(--text-color);
-            padding: 20px;
-            border-radius: 15px;
-            box-shadow: 0 10px 25px var(--shadow-color);
-            display: none;
-            z-index: 1000;
-            transition: background-color 0.3s, color 0.3s;
-        }
-
-        .modal.active {
-            display: block;
-        }
-
-        .close-modal {
-            text-align: right;
-            font-size: 18px;
-            cursor: pointer;
-            margin-bottom: 10px;
-        }
-
         ul.history-list {
             list-style: none;
             padding: 0;
@@ -159,132 +131,38 @@
         ul.history-list li:hover {
             background-color: var(--history-hover-bg);
         }
+
+        #resultContainer {
+            margin-top: 20px;
+            display: none;
+        }
+
+        iframe {
+            width: 100%;
+            height: 300px;
+            border: 0;
+            border-radius: 10px;
+        }
     </style>
 </head>
 <body>
-<div class="container">
-    <span class="help-icon" onclick="toggleHelpModal()">❓</span>
-    <h1 onclick="toggleTheme()">Navigation Mini App</h1>
-    <div class="input-wrapper">
-        <input type="text" id="searchInput" placeholder="Enter location...">
+    <div class="container">
+        <span class="help-icon" onclick="toggleHelpModal()">❓</span>
+        <h1 onclick="toggleTheme()">Navigation Mini App</h1>
+        <div class="input-wrapper">
+            <input type="text" id="searchInput" placeholder="Enter location...">
+        </div>
+        <button onclick="search()">Search</button>
+        <div class="interactive-text" onclick="showExample()">Need ideas? Click here!</div>
+        <h3>Search History</h3>
+        <ul class="history-list" id="historyList"></ul>
+
+        <div id="resultContainer">
+            <iframe id="mapResult"></iframe>
+        </div>
     </div>
-    <button onclick="search()">Search</button>
-    <div class="interactive-text" onclick="showExample()">Need ideas? Click here!</div>
-    <h3>Search History</h3>
-    <ul class="history-list" id="historyList"></ul>
 
-    <!-- Контейнер для отображения результата -->
-    <div id="resultContainer" style="margin-top: 20px; display: none;">
-        <iframe id="mapResult" style="width: 100%; height: 300px; border: 0; border-radius: 10px;"></iframe>
-    </div>
-</div>
-
-<script>
-    const historyList = document.getElementById("historyList");
-    const body = document.body;
-
-    function search() {
-        const query = document.getElementById("searchInput").value.trim();
-        if (!query) {
-            alert("Please enter a location to search!");
-            return;
-        }
-
-        const isAddress = /\d+/.test(query);
-        const isStreet = /\b(street|avenue|road|boulevard|drive|lane|carrer|calle)\b/i.test(query);
-        const isMetro = /\b(station|metro|underground|subway)\b/i.test(query) || /Sagrera|Verdaguer|Diagonal|Passeig de Gràcia/i.test(query);
-        const isPlace = /\b(plaza|square|park|area)\b/i.test(query);
-
-        let googleMapsUrl;
-
-        if (isAddress || isMetro) {
-            googleMapsUrl = `https://www.google.com/maps/embed/v1/directions?key=AIzaSyBATkE39afAqUS7riPFCyKsmpkPTwdPpDI&destination=${encodeURIComponent(query)}`;
-        } else if (isStreet || isPlace) {
-            googleMapsUrl = `https://www.google.com/maps/embed/v1/search?key=AIzaSyBATkE39afAqUS7riPFCyKsmpkPTwdPpDI&q=${encodeURIComponent(query)}`;
-        } else {
-            googleMapsUrl = `https://www.google.com/maps/embed/v1/search?key=AIzaSyBATkE39afAqUS7riPFCyKsmpkPTwdPpDI&q=${encodeURIComponent(query)}+near+me`;
-        }
-
-        // Показать результат внутри iframe
-        const resultContainer = document.getElementById("resultContainer");
-        const mapResult = document.getElementById("mapResult");
-
-        mapResult.src = googleMapsUrl;
-        resultContainer.style.display = "block";
-
-        saveToHistory(query);
-        updateHistoryList();
-    }
-
-    function saveToHistory(query) {
-        const history = JSON.parse(localStorage.getItem("searchHistory") || "[]");
-        if (!history.includes(query)) {
-            history.unshift(query);
-            if (history.length > 10) history.pop();
-            localStorage.setItem("searchHistory", JSON.stringify(history));
-        }
-    }
-
-    function updateHistoryList() {
-        const history = JSON.parse(localStorage.getItem("searchHistory") || "[]");
-        historyList.innerHTML = history.map(item => `<li onclick="setSearch('${item}')">${item}</li>`).join("");
-    }
-
-    function setSearch(value) {
-        document.getElementById("searchInput").value = value;
-    }
-
-    function toggleHelpModal() {
-        const helpModal = document.getElementById("helpModal");
-        helpModal.classList.toggle("active");
-    }
-
-    function toggleTheme() {
-        if (body.dataset.theme === "light") {
-            body.dataset.theme = "dark";
-        } else {
-            body.dataset.theme = "light";
-        }
-    }
-
-    function showExample() {
-        const examples = [
-            "Restaurants",
-            "Carrer",
-            "Carrer de",
-            "Coffee shops",
-            "Plaza Catalunya",
-            "ATMs",
-            "Carrer",
-            "Pharmacies",
-            "Tapas",
-            "Sagrada Familia",
-            "Metro Sagrera",
-            "Shopping malls",
-            "Carrer de",
-            "Plaza",
-            "Metro",
-            "Fast food",
-            "Gyms",
-            "Bookstores",
-            "Shopping malls",
-            "Cafe",
-            "Tabac shops",
-            "Metro",
-            "Hospitals",
-            "Clinics",
-            "Parking lots",
-        ];
-        const randomExample = examples[Math.floor(Math.random() * examples.length)];
-        document.getElementById("searchInput").value = randomExample;
-    }
-
-    // Initialize history on page load
-    updateHistoryList();
-    // Set default theme to dark
-    body.dataset.theme = "dark";
-</script>
-
+    <script>
         const historyList = document.getElementById("historyList");
         const body = document.body;
 
@@ -297,20 +175,19 @@
 
             const isAddress = /\d+/.test(query);
             const isStreet = /\b(street|avenue|road|boulevard|drive|lane|carrer|calle)\b/i.test(query);
-            const isMetro = /\b(station|metro|underground|subway)\b/i.test(query) || /Sagrera|Verdaguer|Diagonal|Passeig de Gràcia/i.test(query);
+            const isMetro = /\b(station|metro|underground|subway)\b/i.test(query);
             const isPlace = /\b(plaza|square|park|area)\b/i.test(query);
 
             let googleMapsUrl;
-
             if (isAddress || isMetro) {
-                googleMapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(query)}`;
-            } else if (isStreet || isPlace) {
-                googleMapsUrl = `https://www.google.com/maps/search/${encodeURIComponent(query)}`;
+                googleMapsUrl = `https://www.google.com/maps/embed/v1/directions?key=AIzaSyBATkE39afAqUS7riPFCyKsmpkPTwdPpDI&destination=${encodeURIComponent(query)}`;
             } else {
-                googleMapsUrl = `https://www.google.com/maps/search/${encodeURIComponent(query)}+near+me`;
+                googleMapsUrl = `https://www.google.com/maps/embed/v1/search?key=AIzaSyBATkE39afAqUS7riPFCyKsmpkPTwdPpDI&q=${encodeURIComponent(query)}`;
             }
 
-            window.open(googleMapsUrl, "_blank");
+            document.getElementById("mapResult").src = googleMapsUrl;
+            document.getElementById("resultContainer").style.display = "block";
+
             saveToHistory(query);
             updateHistoryList();
         }
@@ -333,54 +210,16 @@
             document.getElementById("searchInput").value = value;
         }
 
-        function toggleHelpModal() {
-            const helpModal = document.getElementById("helpModal");
-            helpModal.classList.toggle("active");
-        }
-
         function toggleTheme() {
-            if (body.dataset.theme === "light") {
-                body.dataset.theme = "dark";
-            } else {
-                body.dataset.theme = "light";
-            }
+            body.dataset.theme = body.dataset.theme === "light" ? "dark" : "light";
         }
 
         function showExample() {
-            const examples = [
-                "Restaurants",
-                "Carrer",
-                "Carrer de",
-                "Coffee shops",
-                "Plaza Catalunya",
-                "ATMs",
-                "Carrer",
-                "Pharmacies",
-                "Tapas",
-                "Sagrada Familia",
-                "Metro Sagrera",
-                "Shopping malls",
-                "Carrer de",
-                "Plaza",
-                "Metro",
-                "Fast food",
-                "Gyms",
-                "Bookstores",
-                "Shopping malls",
-                "Cafe",
-                "Tabac shops",
-                "Metro",
-                "Hospitals",
-                "Clinics",
-                "Parking lots",
-            ];
-            const randomExample = examples[Math.floor(Math.random() * examples.length)];
-            document.getElementById("searchInput").value = randomExample;
+            const examples = ["Restaurants", "Carrer de Llull", "Coffee shops"];
+            document.getElementById("searchInput").value = examples[Math.floor(Math.random() * examples.length)];
         }
 
-        // Initialize history on page load
         updateHistoryList();
-        // Set default theme to dark
         body.dataset.theme = "dark";
     </script>
 </body>
