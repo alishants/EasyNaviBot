@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Navigation Mini App</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-900 text-white flex justify-center items-center min-h-screen">
+    <div class="bg-gray-800 rounded-lg shadow-xl w-full max-w-lg p-6 sm:p-8 relative">
+        <!-- Header -->
+        <header class="flex items-center justify-between mb-6">
+            <h1 class="text-2xl font-bold text-cyan-400 cursor-pointer hover:text-cyan-300 transition">
+                Navigation Mini App
+            </h1>
+            <span class="text-gray-400 text-xl cursor-pointer hover:text-cyan-400 transition" onclick="toggleHelpModal()">❓</span>
+        </header>
+
+        <!-- Search Section -->
+        <div class="mb-6">
+            <label for="searchInput" class="block text-sm text-gray-400 mb-2">Enter location</label>
+            <div class="relative">
+                <input
+                    type="text"
+                    id="searchInput"
+                    class="w-full px-4 py-3 text-lg text-gray-900 rounded-lg border border-gray-300 focus:ring-2 focus:ring-cyan-400 focus:outline-none"
+                    placeholder="Search for a location..."
+                />
+                <span class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 cursor-pointer hover:text-cyan-400 transition" onclick="clearInput()">✖</span>
+            </div>
+        </div>
+
+        <!-- Buttons -->
+        <div class="space-y-4">
+            <button
+                class="w-full bg-cyan-500 text-gray-900 font-bold py-3 rounded-lg hover:bg-cyan-600 transition"
+                onclick="search()"
+            >
+                Search
+            </button>
+            <p
+                class="text-center text-sm text-cyan-400 cursor-pointer hover:underline transition"
+                onclick="showExample()"
+            >
+                Need ideas? Click here!
+            </p>
+        </div>
+
+        <!-- History Section -->
+        <section class="mt-8">
+            <h3 class="text-lg font-semibold mb-4 text-gray-200">Search History</h3>
+            <ul class="space-y-2" id="historyList"></ul>
+        </section>
+    </div>
+
+    <!-- Modal -->
+    <div
+        id="helpModal"
+        class="fixed inset-0 bg-gray-900 bg-opacity-90 flex justify-center items-center hidden z-50"
+    >
+        <div class="bg-gray-800 rounded-lg shadow-lg p-6 max-w-sm w-full">
+            <div class="flex justify-between items-center">
+                <h2 class="text-xl font-semibold text-cyan-400">Search Help</h2>
+                <button class="text-gray-400 text-lg" onclick="toggleHelpModal()">✖</button>
+            </div>
+            <ul class="mt-4 text-gray-400 text-sm space-y-2">
+                <li><strong>Street:</strong> Carrer de Llull</li>
+                <li><strong>Address:</strong> Carrer de Llull 203</li>
+                <li><strong>Metro:</strong> Metro Diagonal</li>
+                <li><strong>Place:</strong> Sagrada Familia</li>
+                <li><strong>Shop:</strong> Tabacs or McDonald's</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        // JavaScript for the mini-app
+        const historyList = document.getElementById("historyList");
+        const body = document.body;
+
+        function search() {
+            const query = document.getElementById("searchInput").value.trim();
+            if (!query) {
+                alert("Please enter a location to search!");
+                return;
+            }
+
+            const googleMapsUrl = generateGoogleMapsUrl(query);
+
+            location.href = googleMapsUrl;
+
+            saveToHistory(query);
+            updateHistoryList();
+        }
+
+        function generateGoogleMapsUrl(query) {
+            const isAddress = /\d+/.test(query);
+            const isStreet = /\b(street|avenue|road|boulevard|drive|lane|carrer|calle)\b/i.test(query);
+            const isMetro = /\b(station|metro|underground|subway)\b/i.test(query) || /Sagrera|Verdaguer|Diagonal|Passeig de Gràcia/i.test(query);
+            const isPlace = /\b(plaza|square|park|area)\b/i.test(query);
+
+            let googleMapsUrl;
+
+            if (isAddress || isMetro) {
+                googleMapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(query)}`;
+            } else if (isStreet || isPlace) {
+                googleMapsUrl = `https://www.google.com/maps/search/${encodeURIComponent(query)}`;
+            } else {
+                googleMapsUrl = `https://www.google.com/maps/search/${encodeURIComponent(query)}+near+me`;
+            }
+
+            return googleMapsUrl;
+        }
+
+        function saveToHistory(query) {
+            const history = JSON.parse(localStorage.getItem("searchHistory") || "[]");
+            if (!history.includes(query)) {
+                history.unshift(query);
+                if (history.length > 10) history.pop();
+                localStorage.setItem("searchHistory", JSON.stringify(history));
+            }
+        }
+
+        function updateHistoryList() {
+            const history = JSON.parse(localStorage.getItem("searchHistory") || "[]");
+            historyList.innerHTML = history.map(item => `<li class="bg-gray-700 p-3 rounded-lg text-gray-300 cursor-pointer hover:bg-gray-600" onclick="setSearch('${item}')">${item}</li>`).join("");
+        }
+
+        function setSearch(value) {
+            document.getElementById("searchInput").value = value;
+        }
+
+        function toggleHelpModal() {
+            const helpModal = document.getElementById("helpModal");
+            helpModal.classList.toggle("hidden");
+        }
+
+        function showExample() {
+            const examples = [
+                "Restaurants", "Carrer", "flowers", "places", "Hotels", "Gas", "Electrical Chargers", "Coffee",
+                "Parks", "Art", "Dessert", "Museum", "Electronics", "Carrer de", "Coffee shops", "Plaza Catalunya",
+                "ATMs", "Pharmacies", "Tapas", "Sagrada Familia", "Metro Sagrera", "Shopping malls", "Car wash",
+                "Gyms", "Bookstores", "Cafe", "Hospitals", "Clinics", "Parking lots"
+            ];
+            const randomExample = examples[Math.floor(Math.random() * examples.length)];
+            document.getElementById("searchInput").value = randomExample;
+        }
+
+        function clearInput() {
+            document.getElementById("searchInput").value = '';
+        }
+
+        updateHistoryList();
+
+        // Bot functionality
+        async function handleBotMessage(message) {
+            const query = message.text.trim();
+            if (!query) return "Please enter a location to search!";
+
+            const googleMapsUrl = generateGoogleMapsUrl(query);
+            saveToHistory(query);
+            updateHistoryList();
+
+            return `Here is your link: ${googleMapsUrl}`;
+        }
+
+        // Simulate bot message handling for demo purposes
+        async function simulateBotInteraction() {
+            const testMessages = ["Carrer de Llull", "Metro Sagrera", "Sagrada Familia"];
+            for (const msg of testMessages) {
+                const response = await handleBotMessage({ text: msg });
+                console.log(response);
+            }
+        }
+
+        // Run the simulation
+        simulateBotInteraction();
+    </script>
+</body>
+</html>
