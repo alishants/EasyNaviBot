@@ -1,39 +1,38 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Navigation Mini App</title>
     <style>
         :root {
-            /* Dark Theme */
+            /* Тёмная тема */
             --bg-color: #000000;
             --container-bg: rgba(30, 30, 30, 0.9);
             --text-color: #ffffff;
             --button-bg: linear-gradient(90deg, #0f2027, #203a43, #2c5364);
             --title-color: #00ffff;
-            --shadow-color: rgba(0, 255, 255, 0.3);
+            --shadow-color: rgba(0, 255, 255, 0.5);
             --icon-color: #ff4d4d;
-            --input-border-color: rgba(0, 255, 255, 0.5);
+            --input-border-color: #ccc;
             --input-bg: #1e1e1e;
-            --history-hover-bg: rgba(0, 255, 255, 0.15);
-            --modal-bg: rgba(20, 20, 20, 0.95);
+            --history-bg: #1a1a1a;
+            --history-hover-bg: rgba(0, 255, 255, 0.1);
         }
 
         [data-theme="light"] {
-            /* Light Theme */
+            /* Светлая тема */
             --bg-color: #f9f9f9;
             --container-bg: #ffffff;
             --text-color: #333333;
             --button-bg: linear-gradient(90deg, #e0eafc, #cfdef3);
             --title-color: #0057ff;
-            --shadow-color: rgba(0, 87, 255, 0.3);
+            --shadow-color: rgba(0, 87, 255, 0.5);
             --icon-color: #ff3333;
-            --input-border-color: rgba(0, 87, 255, 0.5);
+            --input-border-color: #aaa;
             --input-bg: #f1f1f1;
-            --history-hover-bg: rgba(0, 87, 255, 0.15);
-            --modal-bg: rgba(255, 255, 255, 0.95);
+            --history-bg: #f5f5f5;
+            --history-hover-bg: rgba(0, 87, 255, 0.1);
         }
 
         body {
@@ -46,7 +45,7 @@
             align-items: flex-start;
             min-height: 100vh;
             padding-top: 80px;
-            transition: all 0.3s ease-in-out;
+            transition: background-color 0.3s, color 0.3s;
         }
 
         .container {
@@ -58,7 +57,7 @@
             max-width: 400px;
             width: 100%;
             position: relative;
-            transition: all 0.3s ease-in-out;
+            transition: background-color 0.3s, box-shadow 0.3s;
         }
 
         .help-icon {
@@ -68,95 +67,88 @@
             font-size: 24px;
             color: var(--icon-color);
             cursor: pointer;
-            transition: transform 0.2s ease-in-out;
-        }
-
-        .help-icon:hover {
-            transform: scale(1.2);
         }
 
         h1 {
-            font-size: 32px;
+            font-size: 28px;
             margin-bottom: 20px;
             color: var(--title-color);
             cursor: pointer;
-            transition: color 0.3s ease-in-out, transform 0.3s;
-        }
-
-        h1:hover {
-            transform: scale(1.05);
-            color: var(--icon-color);
+            transition: color 0.3s;
         }
 
         .input-wrapper {
             position: relative;
-            margin-bottom: 20px;
         }
 
         input[type="text"] {
-            width: 90%; /* Уменьшенная ширина */
-            padding: 14px 20px 14px 40px; /* Оставлено место для крестика */
-            border-radius: 30px;
-            border: 2px solid var(--input-border-color);
+            width: calc(100% - 20px);
+            padding: 14px;
+            border-radius: 10px;
+            border: 1px solid var(--input-border-color);
             outline: none;
             font-size: 18px;
             background: var(--input-bg);
             color: var(--text-color);
-            transition: all 0.3s ease-in-out;
-            box-shadow: 0 4px 10px rgba(0, 255, 255, 0.2);
+            transition: background-color 0.3s, border-color 0.3s, color 0.3s;
         }
 
         input[type="text"]:focus {
             border-color: var(--title-color);
-            box-shadow: 0 6px 15px var(--shadow-color);
-        }
-
-        .clear-icon {
-            position: absolute;
-            right: 10px;
-            top: 50%;
-            transform: translateY(-50%);
-            font-size: 18px;
-            color: var(--icon-color);
-            cursor: pointer;
-            opacity: 0.8;
-            transition: all 0.3s ease-in-out;
-        }
-
-        .clear-icon:hover {
-            opacity: 1;
+            box-shadow: 0 0 8px var(--title-color);
         }
 
         button {
-            display: inline-block;
             background: var(--button-bg);
             color: var(--text-color);
             border: none;
-            border-radius: 25px;
-            padding: 14px 30px;
+            border-radius: 12px;
+            padding: 14px 25px;
             font-size: 18px;
             cursor: pointer;
             margin-top: 20px;
-            transition: all 0.3s ease-in-out;
-            box-shadow: 0 4px 10px rgba(0, 255, 255, 0.2);
+            transition: background 0.3s, box-shadow 0.3s;
         }
 
         button:hover {
-            transform: scale(1.05);
-            box-shadow: 0 8px 20px rgba(0, 255, 255, 0.4);
+            box-shadow: 0 5px 15px rgba(0, 255, 255, 0.4);
         }
 
         .interactive-text {
-            font-size: 16px;
-            margin-top: 15px;
+            font-size: 14px;
+            margin-top: 20px;
             color: var(--title-color);
             cursor: pointer;
-            transition: all 0.3s ease-in-out;
+            transition: color 0.3s;
         }
 
         .interactive-text:hover {
             text-decoration: underline;
-            color: var(--icon-color);
+        }
+
+        .history-container {
+            background: var(--history-bg);
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 20px;
+        }
+
+        ul.history-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        ul.history-list li {
+            padding: 10px;
+            border-bottom: 1px solid var(--input-border-color);
+            cursor: pointer;
+            text-align: left;
+            transition: background-color 0.3s;
+        }
+
+        ul.history-list li:hover {
+            background-color: var(--history-hover-bg);
         }
 
         .modal {
@@ -165,68 +157,44 @@
             left: 50%;
             transform: translate(-50%, -50%);
             width: 90%;
-            max-width: 450px;
-            background: var(--modal-bg);
+            max-width: 400px;
+            background: var(--container-bg);
             color: var(--text-color);
             padding: 20px;
-            border-radius: 20px;
-            box-shadow: 0 10px 30px var(--shadow-color);
+            border-radius: 15px;
+            box-shadow: 0 10px 25px var(--shadow-color);
             display: none;
             z-index: 1000;
-            transition: all 0.3s ease-in-out;
+            transition: transform 0.3s ease-out, background-color 0.3s, color 0.3s;
         }
 
         .modal.active {
             display: block;
+            transform: translate(-50%, -50%) scale(1.05);
         }
 
         .close-modal {
             text-align: right;
-            font-size: 20px;
+            font-size: 18px;
             cursor: pointer;
             margin-bottom: 10px;
-        }
-
-        .close-modal:hover {
             color: var(--icon-color);
-        }
-
-        ul.history-list {
-            list-style: none;
-            padding: 0;
-            margin-top: 10px;
-        }
-
-        ul.history-list li {
-            padding: 12px 15px;
-            border-radius: 10px;
-            border: 1px solid var(--input-border-color);
-            background: var(--input-bg);
-            cursor: pointer;
-            text-align: left;
-            margin-bottom: 8px;
-            transition: all 0.3s ease-in-out;
-        }
-
-        ul.history-list li:hover {
-            background-color: var(--history-hover-bg);
-            transform: scale(1.02);
         }
     </style>
 </head>
-
 <body>
     <div class="container">
         <span class="help-icon" onclick="toggleHelpModal()">❓</span>
         <h1 onclick="toggleTheme()">Navigation Mini App</h1>
         <div class="input-wrapper">
             <input type="text" id="searchInput" placeholder="Enter location...">
-            <span class="clear-icon" onclick="clearInput()">✖</span>
         </div>
         <button onclick="search()">Search</button>
         <div class="interactive-text" onclick="showExample()">Need ideas? Click here!</div>
-        <h3>Search History</h3>
-        <ul class="history-list" id="historyList"></ul>
+        <div class="history-container">
+            <h3>Search History</h3>
+            <ul class="history-list" id="historyList"></ul>
+        </div>
     </div>
 
     <div class="modal" id="helpModal">
@@ -237,14 +205,112 @@
         <p>Address: <i>Carrer de Llull 203</i></p>
         <p>Metro: <i>Metro Diagonal</i></p>
         <p>Place: <i>Sagrada Familia</i></p>
-        <p>Shop: <i>Tabacs or McDonald's</i></p>
+        <p>Shop: <i>Tabacs or MacDonalds</i></p>
     </div>
 
     <script>
-        function clearInput() {
-            document.getElementById("searchInput").value = '';
+        const historyList = document.getElementById("historyList");
+        const body = document.body;
+
+        function search() {
+            const query = document.getElementById("searchInput").value.trim();
+            if (!query) {
+                alert("Please enter a location to search!");
+                return;
+            }
+
+            const isAddress = /\d+/.test(query);
+            const isStreet = /\b(street|avenue|road|boulevard|drive|lane|carrer|calle)\b/i.test(query);
+            const isMetro = /\b(station|metro|underground|subway)\b/i.test(query) || /Sagrera|Verdaguer|Diagonal|Passeig de Gràcia/i.test(query);
+            const isPlace = /\b(plaza|square|park|area)\b/i.test(query);
+
+            let googleMapsUrl;
+
+            if (isAddress || isMetro) {
+                googleMapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(query)}`;
+            } else if (isStreet || isPlace) {
+                googleMapsUrl = `https://www.google.com/maps/search/${encodeURIComponent(query)}`;
+            } else {
+                googleMapsUrl = `https://www.google.com/maps/search/${encodeURIComponent(query)}+near+me`;
+            }
+
+            location.href = googleMapsUrl;
+
+            saveToHistory(query);
+            updateHistoryList();
         }
+
+        function saveToHistory(query) {
+            const history = JSON.parse(localStorage.getItem("searchHistory") || "[]");
+            if (!history.includes(query)) {
+                history.unshift(query);
+                if (history.length > 10) history.pop();
+                localStorage.setItem("searchHistory", JSON.stringify(history));
+            }
+        }
+
+        function updateHistoryList() {
+            const history = JSON.parse(localStorage.getItem("searchHistory") || "[]");
+            historyList.innerHTML = history.map(item => `<li onclick="setSearch('${item}')">${item}</li>`).join("");
+        }
+
+        function setSearch(value) {
+            document.getElementById("searchInput").value = value;
+        }
+
+        function toggleHelpModal() {
+            const helpModal = document.getElementById("helpModal");
+            helpModal.classList.toggle("active");
+        }
+
+        function toggleTheme() {
+            if (body.dataset.theme === "light") {
+                body.dataset.theme = "dark";
+            } else {
+                body.dataset.theme = "light";
+            }
+        }
+
+        function showExample() {
+            const examples = [
+                "Restaurants",
+                "Carrer",
+                "Carrer de",
+                "Coffee shops",
+                "Plaza Catalunya",
+                "ATMs",
+                "Carrer",
+                "Pharmacies",
+                "Tapas",
+                "Sagrada Familia",
+                "Metro Sagrera",
+                "Shopping malls",
+                "Carrer de",
+                "Plaza",
+                "Metro",
+                "Fast food",
+                "Gyms",
+                "Bookstores",
+                "Shopping malls",
+                "Cafe",
+                "Tabac shops",
+                "Metro",
+                "Hospitals",
+                "Clinics",
+                "Parking lots",
+            ];
+            const randomExample = examples[Math.floor(Math.random() * examples.length)];
+            document.getElementById("searchInput").value = randomExample;
+        }
+
+        // Initialize history on page load
+        updateHistoryList();
+        // Set default theme to dark
+        body.dataset.theme = "dark";
     </script>
 </body>
-
 </html>
+
+
+
+
