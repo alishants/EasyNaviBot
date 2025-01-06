@@ -74,43 +74,49 @@
     </div>
 
     <script>
-        // JavaScript for the mini-app
         const historyList = document.getElementById("historyList");
-        const body = document.body;
-
-        function search() {
-            const query = document.getElementById("searchInput").value.trim();
-            if (!query) {
-                alert("Please enter a location to search!");
-                return;
-            }
-
-            const googleMapsUrl = generateGoogleMapsUrl(query);
-
-            location.href = googleMapsUrl;
-
-            saveToHistory(query);
-            updateHistoryList();
-        }
 
         function generateGoogleMapsUrl(query) {
+            const encodedQuery = encodeURIComponent(query.trim());
             const isAddress = /\d+/.test(query);
             const isStreet = /\b(street|avenue|road|boulevard|drive|lane|carrer|calle)\b/i.test(query);
             const isMetro = /\b(station|metro|underground|subway)\b/i.test(query) || /Sagrera|Verdaguer|Diagonal|Passeig de Gràcia/i.test(query);
             const isPlace = /\b(plaza|square|park|area)\b/i.test(query);
 
-            let googleMapsUrl;
-
             if (isAddress || isMetro) {
-                googleMapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(query)}`;
+                return `https://www.google.com/maps/dir/?api=1&destination=${encodedQuery}`;
             } else if (isStreet || isPlace) {
-                googleMapsUrl = `https://www.google.com/maps/search/${encodeURIComponent(query)}`;
+                return `https://www.google.com/maps/search/${encodedQuery}`;
             } else {
-                googleMapsUrl = `https://www.google.com/maps/search/${encodeURIComponent(query)}+near+me`;
+                return `https://www.google.com/maps/search/${encodedQuery}+near+me`;
             }
-
-            return googleMapsUrl;
         }
+
+function search() {
+    const query = document.getElementById("searchInput").value.trim();
+    if (!query) {
+        alert("Please enter a location to search!");
+        return;
+    }
+
+    const googleMapsUrl = generateGoogleMapsUrl(query);
+
+    try {
+        if (navigator.userAgent.toLowerCase().includes("android")) {
+            // Используем схему `geo:` для Android
+            const geoUrl = `geo:0,0?q=${encodeURIComponent(query)}`;
+            window.location.href = geoUrl;
+        } else {
+            // Для всех остальных устройств используем стандартный URL
+            window.open(googleMapsUrl, "_blank");
+        }
+    } catch (error) {
+        alert(`Не удалось открыть ссылку. Попробуйте вручную: ${googleMapsUrl}`);
+    }
+
+    saveToHistory(query);
+    updateHistoryList();
+}
 
         function saveToHistory(query) {
             const history = JSON.parse(localStorage.getItem("searchHistory") || "[]");
@@ -151,30 +157,6 @@
         }
 
         updateHistoryList();
-
-        // Bot functionality
-        async function handleBotMessage(message) {
-            const query = message.text.trim();
-            if (!query) return "Please enter a location to search!";
-
-            const googleMapsUrl = generateGoogleMapsUrl(query);
-            saveToHistory(query);
-            updateHistoryList();
-
-            return `Here is your link: ${googleMapsUrl}`;
-        }
-
-        // Simulate bot message handling for demo purposes
-        async function simulateBotInteraction() {
-            const testMessages = ["Carrer de Llull", "Metro Sagrera", "Sagrada Familia"];
-            for (const msg of testMessages) {
-                const response = await handleBotMessage({ text: msg });
-                console.log(response);
-            }
-        }
-
-        // Run the simulation
-        simulateBotInteraction();
     </script>
 </body>
 </html>
