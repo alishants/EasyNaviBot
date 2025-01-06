@@ -3,6 +3,7 @@ from telegram import Update
 from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, filters, ContextTypes
 import multiprocessing
 import asyncio
+from urllib.parse import quote
 
 # Flask-приложение для мини-приложения
 app = Flask(__name__)
@@ -20,18 +21,21 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.message.text.strip()
 
-    # Логика формирования URL из второго файла
+    # Кодируем запрос для корректного формирования URL
+    encoded_query = quote(query)
+
+    # Логика формирования URL
     is_address = any(char.isdigit() for char in query)
     is_street = any(word in query.lower() for word in ["street", "avenue", "road", "boulevard", "drive", "lane", "carrer", "calle"])
     is_metro = any(word in query.lower() for word in ["station", "metro", "underground", "subway", "diagonal", "sagrera", "verdaguer"])
     is_place = any(word in query.lower() for word in ["plaza", "square", "park", "area"])
 
     if is_address or is_metro:
-        google_maps_url = f"https://www.google.com/maps/dir/?api=1&destination={query}"
+        google_maps_url = f"https://www.google.com/maps/dir/?api=1&destination={encoded_query}"
     elif is_street or is_place:
-        google_maps_url = f"https://www.google.com/maps/search/{query}"
+        google_maps_url = f"https://www.google.com/maps/search/{encoded_query}"
     else:
-        google_maps_url = f"https://www.google.com/maps/search/{query}+near+me"
+        google_maps_url = f"https://www.google.com/maps/search/{encoded_query}+near+me"
 
     await update.message.reply_text(f"Вот ваша ссылка: {google_maps_url}")
 
