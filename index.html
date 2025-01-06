@@ -92,8 +92,12 @@ function search() {
         const isAndroid = navigator.userAgent.toLowerCase().includes("android");
         const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent);
 
-        // Используем window.open для Android и iOS, чтобы избежать проблем с WebView
-        if (isAndroid || isIOS) {
+        if (isAndroid) {
+            // Для Android явно указываем https:// в ссылке
+            const safeUrl = googleMapsUrl.startsWith("https://") ? googleMapsUrl : `https://${googleMapsUrl}`;
+            window.open(safeUrl, '_blank'); // Открыть в новой вкладке
+        } else if (isIOS) {
+            // Для iOS обработка аналогична
             window.open(googleMapsUrl, '_blank'); // Открыть в новой вкладке
         } else {
             // Для остальных устройств
