@@ -86,12 +86,14 @@
         const googleMapsUrl = generateGoogleMapsUrl(query);
 
         try {
-            if (navigator.userAgent.toLowerCase().includes("android")) {
-                // Для Android устройств
-                window.location.href = googleMapsUrl; // Используем прямую навигацию
+            const userAgent = navigator.userAgent.toLowerCase();
+
+            if (userAgent.includes("iphone") || userAgent.includes("ipad") || userAgent.includes("ipod")) {
+                // Для устройств iOS: прямая навигация
+                window.location.href = googleMapsUrl;
             } else {
-                // Для iPhone и других устройств
-                window.location.href = googleMapsUrl; // Используем прямую навигацию
+                // Для Android и ПК: открытие в новом окне
+                window.open(googleMapsUrl, "_blank");
             }
         } catch (error) {
             alert(`Не удалось открыть ссылку. Попробуйте вручную: ${googleMapsUrl}`);
@@ -132,7 +134,9 @@
 
     function updateHistoryList() {
         const history = JSON.parse(localStorage.getItem("searchHistory") || "[]");
-        historyList.innerHTML = history.map(item => `<li class="bg-gray-700 p-3 rounded-lg text-gray-300 cursor-pointer hover:bg-gray-600" onclick="setSearch('${item}')">${item}</li>`).join("");
+        historyList.innerHTML = history
+            .map(item => `<li class="bg-gray-700 p-3 rounded-lg text-gray-300 cursor-pointer hover:bg-gray-600" onclick="setSearch('${item}')">${item}</li>`)
+            .join("");
     }
 
     function setSearch(value) {
