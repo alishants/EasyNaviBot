@@ -76,22 +76,6 @@
     <script>
         const historyList = document.getElementById("historyList");
 
-        function generateGoogleMapsUrl(query) {
-            const encodedQuery = encodeURIComponent(query.trim());
-            const isAddress = /\d+/.test(query);
-            const isStreet = /\b(street|avenue|road|boulevard|drive|lane|carrer|calle)\b/i.test(query);
-            const isMetro = /\b(station|metro|underground|subway)\b/i.test(query) || /Sagrera|Verdaguer|Diagonal|Passeig de Gràcia/i.test(query);
-            const isPlace = /\b(plaza|square|park|area)\b/i.test(query);
-
-            if (isAddress || isMetro) {
-                return `https://www.google.com/maps/dir/?api=1&destination=${encodedQuery}`;
-            } else if (isStreet || isPlace) {
-                return `https://www.google.com/maps/search/${encodedQuery}`;
-            } else {
-                return `https://www.google.com/maps/search/${encodedQuery}+near+me`;
-            }
-        }
-
 function search() {
     const query = document.getElementById("searchInput").value.trim();
     if (!query) {
@@ -103,11 +87,11 @@ function search() {
 
     try {
         if (navigator.userAgent.toLowerCase().includes("android")) {
-            // Используем схему `geo:` для Android
-            const geoUrl = `geo:0,0?q=${encodeURIComponent(query)}`;
-            window.location.href = geoUrl;
+            // Принудительно для Android устройств
+            const androidIntentUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`;
+            window.open(androidIntentUrl, "_blank"); // Открытие в новом окне
         } else {
-            // Для всех остальных устройств используем стандартный URL
+            // Для других устройств
             window.open(googleMapsUrl, "_blank");
         }
     } catch (error) {
@@ -116,6 +100,26 @@ function search() {
 
     saveToHistory(query);
     updateHistoryList();
+}
+
+function generateGoogleMapsUrl(query) {
+    const encodedQuery = encodeURIComponent(query.trim());
+    const isAddress = /\d+/.test(query);
+    const isStreet = /\b(street|avenue|road|boulevard|drive|lane|carrer|calle)\b/i.test(query);
+    const isMetro = /\b(station|metro|underground|subway)\b/i.test(query) || /Sagrera|Verdaguer|Diagonal|Passeig de Gràcia/i.test(query);
+    const isPlace = /\b(plaza|square|park|area)\b/i.test(query);
+
+    let googleMapsUrl;
+
+    if (isAddress || isMetro) {
+        googleMapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodedQuery}`;
+    } else if (isStreet || isPlace) {
+        googleMapsUrl = `https://www.google.com/maps/search/${encodedQuery}`;
+    } else {
+        googleMapsUrl = `https://www.google.com/maps/search/${encodedQuery}+near+me`;
+    }
+
+    return googleMapsUrl;
 }
 
         function saveToHistory(query) {
