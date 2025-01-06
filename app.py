@@ -1,18 +1,13 @@
-from flask import Flask, render_template
+from flask import Flask, request, render_template
 from telegram import Update
 from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, filters, ContextTypes
-import threading
-import asyncio
+import os
 
-# Flask-приложение для мини-приложения
 app = Flask(__name__)
 
-@app.route("/")
-def home():
-    return render_template("index.html")  # Путь к вашему мини-приложению в папке templates
-
-# Telegram-бот
+# Telegram Bot
 TOKEN = "8197947754:AAG0EtbpnqKGU3w0P7Sy_3AA4wko1Ps-ZL4"
+WEBHOOK_URL = "https://https://easynavibot.onrender.com/webhook"  # Замените your-render-url.com на ваш URL Render
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text("Привет! Введите запрос, чтобы я нашёл это место на Google Maps.")
@@ -22,14 +17,21 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     google_maps_url = f"https://www.google.com/maps/search/{query}"
     await update.message.reply_text(f"Вот ваша ссылка: {google_maps_url}")
 
-def start_bot():
-    asyncio.set_event_loop(asyncio.new_event_loop())  # Создаём новый цикл событий для потока
-    application = ApplicationBuilder().token(TOKEN).build()
-    application.add_handler(CommandHandler("start", start))
-    application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
-    application.run_polling()
+@app.route("/webhook", methods=["POST"])
+def webhook():
+    update = Update.de_json(request.get_json(), bot_app.bot)
+    bot_app.process_update(update)
+    return "OK", 200
 
-# Запуск Flask и Telegram-бота параллельно
+@app.route("/")
+def home():
+    return render_template("index.html")  # Ваше мини-приложение
+
 if __name__ == "__main__":
-    threading.Thread(target=start_bot, daemon=True).start()  # Запуск Telegram-бота в отдельном потоке
-    app.run(host="0.0.0.0", port=5000)  # Запуск Flask
+    bot_app = ApplicationBuilder().token(TOKEN).build()
+    bot_app.add_handler(CommandHandler("start", start))
+    bot_app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
+    
+    # Устанавливаем вебхук
+    bot_app.bot.set_webhook(WEBHOOK_URL)
+    app.run(host="0.0.0.0", port=5000)
