@@ -78,6 +78,11 @@
         const historyList = document.getElementById("historyList");
         const body = document.body;
 
+function generateGoogleMapsUrl(query) {
+    const encodedQuery = encodeURIComponent(query.trim());
+    return `https://www.google.com/maps/dir/?api=1&destination=${encodedQuery}`;
+}
+
 function search() {
     const query = document.getElementById("searchInput").value.trim();
     if (!query) {
@@ -87,41 +92,13 @@ function search() {
 
     const googleMapsUrl = generateGoogleMapsUrl(query);
 
-    try {
-        // Преобразуем ссылку в безопасный формат, явно добавляя https://
-        const safeUrl = googleMapsUrl.startsWith("https://") ? googleMapsUrl : `https://${googleMapsUrl}`;
+    // Открываем ссылку в новом окне/вкладке
+    window.open(googleMapsUrl, "_blank");
 
-        // Используем метод window.open для открытия ссылки
-        window.location.href = safeUrl;
-    } catch (error) {
-        // Если произошла ошибка, показываем пользователю ссылку для ручного использования
-        alert(`Не удалось открыть ссылку. Попробуйте вручную: ${googleMapsUrl}`);
-    }
-
-    // Сохраняем запрос в историю
     saveToHistory(query);
     updateHistoryList();
 }
 
-function generateGoogleMapsUrl(query) {
-    const encodedQuery = encodeURIComponent(query.trim());
-    const isAddress = /\d+/.test(query);
-    const isStreet = /\b(street|avenue|road|boulevard|drive|lane|carrer|calle)\b/i.test(query);
-    const isMetro = /\b(station|metro|underground|subway)\b/i.test(query) || /Sagrera|Verdaguer|Diagonal|Passeig de Gràcia/i.test(query);
-    const isPlace = /\b(plaza|square|park|area)\b/i.test(query);
-
-    let googleMapsUrl;
-
-    if (isAddress || isMetro) {
-        googleMapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodedQuery}`;
-    } else if (isStreet || isPlace) {
-        googleMapsUrl = `https://www.google.com/maps/search/${encodedQuery}`;
-    } else {
-        googleMapsUrl = `https://www.google.com/maps/search/${encodedQuery}+near+me`;
-    }
-
-    return googleMapsUrl;
-}
 
         function saveToHistory(query) {
             const history = JSON.parse(localStorage.getItem("searchHistory") || "[]");
