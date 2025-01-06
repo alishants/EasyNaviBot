@@ -8,28 +8,40 @@
     <style>
         /* Custom styles for premium look */
         body {
-            background: linear-gradient(to bottom, #1a1a2e, #16213e, #0f3460);
-            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #1e3a8a, #0f172a);
+            font-family: 'Inter', sans-serif;
         }
-        .card {
-            background: linear-gradient(to top right, #2c5364, #0f2027, #203a43);
-            box-shadow: 0px 10px 25px rgba(0, 0, 0, 0.6);
+
+        .glass {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
         }
-        .btn {
-            background: linear-gradient(to right, #00d2ff, #3a7bd5);
+
+        .shadow-gradient {
+            box-shadow: 0px 10px 15px rgba(0, 0, 0, 0.4);
         }
-        .btn:hover {
-            background: linear-gradient(to right, #3a7bd5, #00d2ff);
+
+        .btn-gradient {
+            background: linear-gradient(90deg, #06b6d4, #3b82f6);
         }
+
+        .btn-gradient:hover {
+            background: linear-gradient(90deg, #3b82f6, #06b6d4);
+        }
+
         input {
             background-color: rgba(255, 255, 255, 0.2);
         }
+
         input:focus {
             border-color: #00d2ff;
         }
+
         .history-item {
             transition: transform 0.2s ease, background-color 0.2s ease;
         }
+
         .history-item:hover {
             transform: scale(1.02);
             background-color: #16213e;
@@ -37,68 +49,77 @@
     </style>
 </head>
 <body class="flex justify-center items-center min-h-screen text-white">
-    <div class="card rounded-lg p-8 w-full max-w-lg relative">
+    <div class="glass rounded-xl shadow-gradient max-w-xl w-full p-8">
         <!-- Header -->
-        <header class="flex items-center justify-between mb-6">
-            <h1 class="text-3xl font-bold text-cyan-400 hover:text-cyan-300 transition">
+        <header class="flex items-center justify-between mb-8">
+            <h1 class="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-blue-600">
                 Easy Navi App
             </h1>
-            <span class="text-gray-400 text-2xl cursor-pointer hover:text-cyan-400 transition" onclick="toggleHelpModal()">❓</span>
+            <button class="text-gray-300 hover:text-white transition" onclick="toggleHelpModal()">❓</button>
         </header>
 
         <!-- Search Section -->
         <div class="mb-6">
-            <label for="searchInput" class="block text-lg text-gray-300 mb-2">Enter a location:</label>
+            <label for="searchInput" class="block text-lg font-medium text-gray-200 mb-2">Search for a Location</label>
             <div class="relative">
                 <input
                     type="text"
                     id="searchInput"
-                    class="w-full px-4 py-3 text-lg text-white rounded-lg border border-gray-500 focus:ring-2 focus:outline-none"
-                    placeholder="E.g., 'Parks' or 'Carrer de Llull 23'"
+                    class="w-full px-5 py-4 text-gray-900 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:outline-none text-base"
+                    placeholder="Enter location, e.g., 'Carrer de Llull 203'"
                 />
-                <span class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 cursor-pointer hover:text-cyan-400 transition" onclick="clearInput()">✖</span>
+                <button
+                    class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-cyan-400 transition"
+                    onclick="clearInput()"
+                >
+                    ✖
+                </button>
             </div>
         </div>
 
         <!-- Buttons -->
-        <div class="space-y-4">
+        <div class="flex flex-col space-y-4">
             <button
-                class="btn w-full py-3 rounded-lg text-gray-900 font-bold hover:shadow-lg transition"
+                class="btn-gradient text-white py-3 rounded-lg text-lg font-semibold shadow-md transition hover:shadow-lg"
                 onclick="search()"
             >
-                Search
+                🔍 Search
             </button>
-            <p
-                class="text-center text-sm text-cyan-300 cursor-pointer hover:underline transition"
+            <button
+                class="text-center text-sm text-cyan-400 hover:underline transition"
                 onclick="showExample()"
             >
-                Need ideas? Try these!
-            </p>
+                Need inspiration? Click for examples!
+            </button>
         </div>
 
         <!-- History Section -->
-        <section class="mt-8">
+        <section class="mt-10">
             <h3 class="text-xl font-semibold mb-4 text-gray-300">Search History</h3>
-            <ul class="space-y-2" id="historyList"></ul>
+            <ul class="space-y-3" id="historyList"></ul>
         </section>
     </div>
 
-    <!-- Modal -->
+    <!-- Help Modal -->
     <div
         id="helpModal"
-        class="fixed inset-0 bg-gray-900 bg-opacity-90 flex justify-center items-center hidden z-50"
+        class="fixed inset-0 bg-gray-900 bg-opacity-80 flex justify-center items-center hidden z-50"
     >
-        <div class="card rounded-lg shadow-lg p-6 max-w-sm w-full">
-            <div class="flex justify-between items-center">
-                <h2 class="text-2xl font-semibold text-cyan-400">Search Tips</h2>
-                <button class="text-gray-400 text-lg" onclick="toggleHelpModal()">✖</button>
-            </div>
-            <ul class="mt-4 text-gray-300 text-base space-y-2">
-                <li><strong>Street:</strong> Type a street name, e.g., 'Carrer de Llull'.</li>
-                <li><strong>Address:</strong> Include house numbers, e.g., 'Carrer de Llull 203'.</li>
-                <li><strong>Landmark:</strong> Search for famous spots, e.g., 'Sagrada Familia'.</li>
-                <li><strong>Category:</strong> Find specific places, e.g., 'Gas near me' or 'Restaurants'.</li>
+        <div class="glass rounded-lg shadow-lg p-6 max-w-sm w-full text-center">
+            <h2 class="text-2xl font-semibold text-cyan-400 mb-4">Help</h2>
+            <ul class="text-gray-300 space-y-2 text-base">
+                <li><strong>Street:</strong> Carrer de Llull</li>
+                <li><strong>Address:</strong> Carrer de Llull 203</li>
+                <li><strong>Metro:</strong> Metro Diagonal</li>
+                <li><strong>Place:</strong> Sagrada Familia</li>
+                <li><strong>Shop:</strong> Tabacs or McDonald's</li>
             </ul>
+            <button
+                class="mt-6 bg-cyan-500 text-white py-2 px-6 rounded-lg font-medium hover:bg-cyan-600 transition"
+                onclick="toggleHelpModal()"
+            >
+                Close
+            </button>
         </div>
     </div>
 
@@ -125,7 +146,7 @@
                     window.open(googleMapsUrl, "_blank");
                 }
             } catch (error) {
-                alert(`Couldn't open the link. Try manually: ${googleMapsUrl}`);
+                alert(`Unable to open the link. Try manually: ${googleMapsUrl}`);
             }
 
             saveToHistory(query);
@@ -159,9 +180,9 @@
 
         function updateHistoryList() {
             const history = JSON.parse(localStorage.getItem("searchHistory") || "[]");
-            historyList.innerHTML = history
-                .map(item => `<li class="history-item bg-gray-700 p-3 rounded-lg text-gray-300 cursor-pointer hover:bg-gray-600" onclick="setSearch('${item}')">${item}</li>`)
-                .join("");
+            historyList.innerHTML = history.map(
+                item => `<li class="history-item bg-gray-700 p-3 rounded-lg text-gray-300 cursor-pointer hover:bg-gray-600" onclick="setSearch('${item}')">${item}</li>`
+            ).join("");
         }
 
         function setSearch(value) {
