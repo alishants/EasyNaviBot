@@ -7,7 +7,7 @@ app = Flask(__name__)
 
 # Telegram Bot
 TOKEN = "8197947754:AAG0EtbpnqKGU3w0P7Sy_3AA4wko1Ps-ZL4"
-WEBHOOK_URL = "https://https://easynavibot.onrender.com/webhook"  # Замените your-render-url.com на ваш URL Render
+WEBHOOK_URL = "https://easynavibot.onrender.com/webhook"  # Замените your-render-url.com на ваш URL Render
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text("Привет! Введите запрос, чтобы я нашёл это место на Google Maps.")
