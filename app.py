@@ -3,6 +3,7 @@ from telegram import Update
 from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, filters, ContextTypes
 import threading
 import asyncio
+import os
 
 # Flask-приложение для мини-приложения
 app = Flask(__name__)
@@ -32,4 +33,4 @@ def start_bot():
 # Запуск Flask и Telegram-бота параллельно
 if __name__ == "__main__":
     threading.Thread(target=start_bot, daemon=True).start()  # Запуск Telegram-бота в отдельном потоке
-    app.run(host="0.0.0.0", port=5000)  # Запуск Flask
+    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))  # Используем переменную окружения PORT
