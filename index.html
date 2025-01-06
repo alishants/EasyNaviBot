@@ -92,24 +92,31 @@
             }
         }
 
-        function search() {
-            const query = document.getElementById("searchInput").value.trim();
-            if (!query) {
-                alert("Please enter a location to search!");
-                return;
-            }
+function search() {
+    const query = document.getElementById("searchInput").value.trim();
+    if (!query) {
+        alert("Please enter a location to search!");
+        return;
+    }
 
-            const googleMapsUrl = generateGoogleMapsUrl(query);
+    const googleMapsUrl = generateGoogleMapsUrl(query);
 
-            try {
-                window.open(googleMapsUrl, "_blank");
-            } catch (error) {
-                alert(`Не удалось открыть ссылку. Попробуйте вручную: ${googleMapsUrl}`);
-            }
-
-            saveToHistory(query);
-            updateHistoryList();
+    try {
+        if (navigator.userAgent.toLowerCase().includes("android")) {
+            // Используем схему `geo:` для Android
+            const geoUrl = `geo:0,0?q=${encodeURIComponent(query)}`;
+            window.location.href = geoUrl;
+        } else {
+            // Для всех остальных устройств используем стандартный URL
+            window.open(googleMapsUrl, "_blank");
         }
+    } catch (error) {
+        alert(`Не удалось открыть ссылку. Попробуйте вручную: ${googleMapsUrl}`);
+    }
+
+    saveToHistory(query);
+    updateHistoryList();
+}
 
         function saveToHistory(query) {
             const history = JSON.parse(localStorage.getItem("searchHistory") || "[]");
