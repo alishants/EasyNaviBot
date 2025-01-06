@@ -118,8 +118,10 @@
                 const userAgent = navigator.userAgent.toLowerCase();
 
                 if (userAgent.includes("iphone") || userAgent.includes("ipad") || userAgent.includes("ipod")) {
+                    // iOS: Direct navigation
                     window.location.href = googleMapsUrl;
                 } else {
+                    // Android/PC: Open in a new window
                     window.open(googleMapsUrl, "_blank");
                 }
             } catch (error) {
@@ -137,13 +139,17 @@
             const isMetro = /\b(station|metro|underground|subway)\b/i.test(query) || /Sagrera|Verdaguer|Diagonal|Passeig de Gràcia/i.test(query);
             const isPlace = /\b(plaza|square|park|area)\b/i.test(query);
 
+            let googleMapsUrl;
+
             if (isAddress || isMetro) {
-                return `https://www.google.com/maps/dir/?api=1&destination=${encodedQuery}`;
+                googleMapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodedQuery}`;
             } else if (isStreet || isPlace) {
-                return `https://www.google.com/maps/search/${encodedQuery}`;
+                googleMapsUrl = `https://www.google.com/maps/search/${encodedQuery}`;
             } else {
-                return `https://www.google.com/maps/search/${encodedQuery}+near+me`;
+                googleMapsUrl = `https://www.google.com/maps/search/${encodedQuery}+near+me`;
             }
+
+            return googleMapsUrl;
         }
 
         function saveToHistory(query) {
