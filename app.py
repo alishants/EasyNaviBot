@@ -19,7 +19,20 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.message.text.strip()
-    google_maps_url = f"https://www.google.com/maps/search/{query}"
+
+    # Логика формирования URL из второго файла
+    is_address = any(char.isdigit() for char in query)
+    is_street = any(word in query.lower() for word in ["street", "avenue", "road", "boulevard", "drive", "lane", "carrer", "calle"])
+    is_metro = any(word in query.lower() for word in ["station", "metro", "underground", "subway", "diagonal", "sagrera", "verdaguer"])
+    is_place = any(word in query.lower() for word in ["plaza", "square", "park", "area"])
+
+    if is_address or is_metro:
+        google_maps_url = f"https://www.google.com/maps/dir/?api=1&destination={query}"
+    elif is_street or is_place:
+        google_maps_url = f"https://www.google.com/maps/search/{query}"
+    else:
+        google_maps_url = f"https://www.google.com/maps/search/{query}+near+me"
+
     await update.message.reply_text(f"Вот ваша ссылка: {google_maps_url}")
 
 def start_bot():
