@@ -78,20 +78,36 @@
         const historyList = document.getElementById("historyList");
         const body = document.body;
 
-        function search() {
-            const query = document.getElementById("searchInput").value.trim();
-            if (!query) {
-                alert("Please enter a location to search!");
-                return;
-            }
+function search() {
+    const query = document.getElementById("searchInput").value.trim();
+    if (!query) {
+        alert("Please enter a location to search!");
+        return;
+    }
 
-            const googleMapsUrl = generateGoogleMapsUrl(query);
+    const googleMapsUrl = generateGoogleMapsUrl(query);
 
-            location.href = googleMapsUrl;
+    try {
+        // Проверяем тип устройства
+        const isAndroid = navigator.userAgent.toLowerCase().includes("android");
+        const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent);
 
-            saveToHistory(query);
-            updateHistoryList();
+        // Используем window.open для Android и iOS, чтобы избежать проблем с WebView
+        if (isAndroid || isIOS) {
+            window.open(googleMapsUrl, '_blank'); // Открыть в новой вкладке
+        } else {
+            // Для остальных устройств
+            location.href = googleMapsUrl; // Перенаправление в текущей вкладке
         }
+    } catch (error) {
+        // Если произошла ошибка, предложим пользователю ссылку вручную
+        alert(`Не удалось открыть ссылку. Попробуйте вручную: ${googleMapsUrl}`);
+    }
+
+    // Сохраняем запрос в историю
+    saveToHistory(query);
+    updateHistoryList();
+}
 
         function generateGoogleMapsUrl(query) {
             const isAddress = /\d+/.test(query);
