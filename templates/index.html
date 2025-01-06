@@ -41,7 +41,7 @@
         <!-- Header -->
         <header class="flex items-center justify-between mb-6">
             <h1 class="text-3xl font-bold text-cyan-400 hover:text-cyan-300 transition">
-                Navigation App 🚀
+                Easy Navi App
             </h1>
             <span class="text-gray-400 text-2xl cursor-pointer hover:text-cyan-400 transition" onclick="toggleHelpModal()">❓</span>
         </header>
@@ -54,7 +54,7 @@
                     type="text"
                     id="searchInput"
                     class="w-full px-4 py-3 text-lg text-white rounded-lg border border-gray-500 focus:ring-2 focus:outline-none"
-                    placeholder="E.g., 'Central Park' or 'Gas near me'"
+                    placeholder="E.g., 'Parks' or 'Carrer de Llull 23'"
                 />
                 <span class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 cursor-pointer hover:text-cyan-400 transition" onclick="clearInput()">✖</span>
             </div>
@@ -139,17 +139,13 @@
             const isMetro = /\b(station|metro|underground|subway)\b/i.test(query) || /Sagrera|Verdaguer|Diagonal|Passeig de Gràcia/i.test(query);
             const isPlace = /\b(plaza|square|park|area)\b/i.test(query);
 
-            let googleMapsUrl;
-
             if (isAddress || isMetro) {
-                googleMapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodedQuery}`;
+                return `https://www.google.com/maps/dir/?api=1&destination=${encodedQuery}`;
             } else if (isStreet || isPlace) {
-                googleMapsUrl = `https://www.google.com/maps/search/${encodedQuery}`;
+                return `https://www.google.com/maps/search/${encodedQuery}`;
             } else {
-                googleMapsUrl = `https://www.google.com/maps/search/${encodedQuery}+near+me`;
+                return `https://www.google.com/maps/search/${encodedQuery}+near+me`;
             }
-
-            return googleMapsUrl;
         }
 
         function saveToHistory(query) {
