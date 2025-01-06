@@ -88,23 +88,13 @@ function search() {
     const googleMapsUrl = generateGoogleMapsUrl(query);
 
     try {
-        // Проверяем тип устройства
-        const isAndroid = navigator.userAgent.toLowerCase().includes("android");
-        const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent);
+        // Преобразуем ссылку в безопасный формат, явно добавляя https://
+        const safeUrl = googleMapsUrl.startsWith("https://") ? googleMapsUrl : `https://${googleMapsUrl}`;
 
-        if (isAndroid) {
-            // Для Android явно указываем https:// в ссылке
-            const safeUrl = googleMapsUrl.startsWith("https://") ? googleMapsUrl : `https://${googleMapsUrl}`;
-            window.open(safeUrl, '_blank'); // Открыть в новой вкладке
-        } else if (isIOS) {
-            // Для iOS обработка аналогична
-            window.open(googleMapsUrl, '_blank'); // Открыть в новой вкладке
-        } else {
-            // Для остальных устройств
-            location.href = googleMapsUrl; // Перенаправление в текущей вкладке
-        }
+        // Используем метод window.open для открытия ссылки
+        window.location.href = safeUrl;
     } catch (error) {
-        // Если произошла ошибка, предложим пользователю ссылку вручную
+        // Если произошла ошибка, показываем пользователю ссылку для ручного использования
         alert(`Не удалось открыть ссылку. Попробуйте вручную: ${googleMapsUrl}`);
     }
 
@@ -113,24 +103,25 @@ function search() {
     updateHistoryList();
 }
 
-        function generateGoogleMapsUrl(query) {
-            const isAddress = /\d+/.test(query);
-            const isStreet = /\b(street|avenue|road|boulevard|drive|lane|carrer|calle)\b/i.test(query);
-            const isMetro = /\b(station|metro|underground|subway)\b/i.test(query) || /Sagrera|Verdaguer|Diagonal|Passeig de Gràcia/i.test(query);
-            const isPlace = /\b(plaza|square|park|area)\b/i.test(query);
+function generateGoogleMapsUrl(query) {
+    const encodedQuery = encodeURIComponent(query.trim());
+    const isAddress = /\d+/.test(query);
+    const isStreet = /\b(street|avenue|road|boulevard|drive|lane|carrer|calle)\b/i.test(query);
+    const isMetro = /\b(station|metro|underground|subway)\b/i.test(query) || /Sagrera|Verdaguer|Diagonal|Passeig de Gràcia/i.test(query);
+    const isPlace = /\b(plaza|square|park|area)\b/i.test(query);
 
-            let googleMapsUrl;
+    let googleMapsUrl;
 
-            if (isAddress || isMetro) {
-                googleMapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(query)}`;
-            } else if (isStreet || isPlace) {
-                googleMapsUrl = `https://www.google.com/maps/search/${encodeURIComponent(query)}`;
-            } else {
-                googleMapsUrl = `https://www.google.com/maps/search/${encodeURIComponent(query)}+near+me`;
-            }
+    if (isAddress || isMetro) {
+        googleMapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodedQuery}`;
+    } else if (isStreet || isPlace) {
+        googleMapsUrl = `https://www.google.com/maps/search/${encodedQuery}`;
+    } else {
+        googleMapsUrl = `https://www.google.com/maps/search/${encodedQuery}+near+me`;
+    }
 
-            return googleMapsUrl;
-        }
+    return googleMapsUrl;
+}
 
         function saveToHistory(query) {
             const history = JSON.parse(localStorage.getItem("searchHistory") || "[]");
